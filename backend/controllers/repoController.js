@@ -11,6 +11,7 @@ dotenv.config();
 const MAX_CODE_LENGTH = 3000000; // rough limit to avoid token overflow
 
 export const analyzeRepo = async (req, res) => {
+    console.log("Received analyze request for repo:", req.body.repoUrl);
     const io = getSocket();
     let localPath = null;
     
@@ -20,15 +21,17 @@ export const analyzeRepo = async (req, res) => {
         if (!repoUrl || !repoUrl.includes("github.com")) {
             return res.status(400).json({ error: 'Valid GitHub Repository URL is required' });
         }
-
+        console.log("Emitting cloning_started event to socket:", socketId);
         io.to(socketId).emit('progress', { step: 'cloning_started', message: 'Cloning repository...' });
-        
+        console.log("Cloning repository:", repoUrl);
+
         localPath = await cloneRepo(repoUrl);
         
         io.to(socketId).emit('progress', { step: 'cloning_completed', message: 'Cloned successfully' });
         io.to(socketId).emit('progress', { step: 'reading_files', message: 'Reading project files...' });
-        
-        let repoCode = readRepoFiles(localPath);
+        console.log("Reading files from:", localPath);
+
+        let repoCode =await readRepoFiles(localPath);
 
         // Basic check for repository code size
         if (!repoCode || repoCode.trim().length === 0) {
@@ -45,6 +48,7 @@ export const analyzeRepo = async (req, res) => {
         const aiSummary = await analyzeCodeWithAI(repoCode);
         
         io.to(socketId).emit('progress', { step: 'analysis_completed', message: 'Analysis ready' });
+        console.log("AI analysis completed, sending response");
 
         res.json({
             message: 'Repository analyzed successfully',
@@ -57,7 +61,7 @@ export const analyzeRepo = async (req, res) => {
         const socketId = req.body.socketId;
         if (socketId) {
             io.to(socketId).emit('progress_error', { message: error.message });
-        }
+        }                                                                                                                                                                                                    
         
         return res.status(500).json({ error: error.message || 'Failed to analyze repository' });
     } finally {

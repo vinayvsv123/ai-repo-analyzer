@@ -13,7 +13,7 @@ export const cloneRepo = async (repoUrl) => {
     }
 
     try {
-        await git.clone(repoUrl, clonePath);
+        await git.clone(repoUrl, clonePath, ['--depth', '1']);
         return clonePath;
     } catch (error) {
         throw new Error(`Failed to clone repository: ${error.message}`);

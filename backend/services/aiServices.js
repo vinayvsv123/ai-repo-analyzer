@@ -1,48 +1,59 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+// ✅ Only API key here. NOTHING else.
+const genAI = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY,
+});
 
 export const analyzeCodeWithAI = async (repoCode) => {
-    try {
-        const model = genAI.getGenerativeModel({
-            model: "gemini-1.5-flash-latest"
-        });
+  console.log("Analyzing code with Gemini...");
 
-        const prompt = `
-You are an expert software engineer. Analyze this repository code and provide a structured JSON output. Make sure you only return valid JSON without any markdown blocks.
+  try {
+    const prompt = `
+You are an expert software engineer helping a NEW DEVELOPER understand a project.
 
-The JSON should have the following structure exactly:
+Analyze the repository and generate a structured JSON.
+
+Return ONLY valid JSON (no markdown, no explanation).
+
 {
-    "summary": "Overall project summary including the purpose of this repository.",
-    "techStack": ["Array", "of", "technologies", "used"],
-    "folderExplanation": "Explanation of the folder structure and architecture.",
-    "complexityLevel": "One of: Beginner, Intermediate, Advanced",
-    "improvements": ["List", "of", "suggested", "improvements"],
-    "resumeDescription": "A professional 3-sentence description suitable for a resume."
+  "projectOverview": "Explain what this project does in simple terms.",
+  "appFlow": "Step by step flow of how the app works (user → frontend → backend → database → response).",
+  "techStack": ["List of technologies used"],
+  "folderStructure": "Explain important folders and what they do.",
+  "databaseExplanation": "Explain database structure, collections/tables and relationships if any.",
+  "keyFeatures": ["Main features of the project"],
+  "whereToStart": "Guide a new developer where to start reading the code.",
+  "complexityLevel": "Beginner | Intermediate | Advanced",
+  "improvements": ["Suggestions to improve the project"],
+  "resumeDescription": "3 line professional description"
 }
 
-Code:
+Repository Code:
 ${repoCode}
 `;
 
-        const result = await model.generateContent(prompt);
-        const responseText = await result.response.text();
+    // ✅ Model is specified ONLY here
+    const response = await genAI.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+    });
 
-        // Extract JSON from potential Markdown formatting
-        const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+    const text = response.text.trim();
 
-        try {
-            return JSON.parse(cleanJson);
-        } catch (e) {
-            console.error("Failed to parse JSON response:", cleanJson);
-            throw new Error("AI returned malformed JSON");
-        }
+    // Clean markdown if Gemini adds it
+    const cleanJson = text
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
 
-    } catch (error) {
-        console.error("GEMINI ERROR:", error);
-        throw error;
-    }
+    return JSON.parse(cleanJson);
+
+  } catch (error) {
+    console.error("GEMINI ERROR:", error);
+    throw new Error("Failed to analyze code with Gemini");
+  }
 };

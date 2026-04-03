@@ -4,18 +4,18 @@ import path from 'path';
 const IGNORED_DIRS = ['.git', 'node_modules', 'dist', 'build', '.next', '.vscode'];
 const IGNORED_FILES = ['package-lock.json', 'yarn.lock', 'pnpm-lock.yaml'];
 
-export const readRepoFiles = (dirPath) => {
+export const readRepoFiles = async(dirPath) => {
     let allCode = '';
 
-    const files = fs.readdirSync(dirPath);
+    const files = await fs.readdir(dirPath);
 
     for (const file of files) {
         const fullPath = path.join(dirPath, file);
-        const stat = fs.statSync(fullPath);
+        const stat = await fs.stat(fullPath);
 
         if (stat.isDirectory()) {
             if (!IGNORED_DIRS.includes(file)) {
-                allCode += readRepoFiles(fullPath);
+                allCode += await readRepoFiles(fullPath);
             }
         } else {
             if (
