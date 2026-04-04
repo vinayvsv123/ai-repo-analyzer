@@ -10,3 +10,21 @@ export const analyzeRepository = async (repoUrl, socketId) => {
         throw error.response?.data?.error || error.message || 'An error occurred during analysis';
     }
 };
+
+export const chatWithRepository = async (repoUrl, question, history) => {
+    try {
+        const response = await axios.post(`${API_URL}/repo/chat`, { repoUrl, question, history });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data?.error || error.message || 'An error occurred during chat';
+    }
+};
+
+export const explainFile = async (filePath, fileContent) => {
+    try {
+        const response = await axios.post(`${API_URL}/repo/explain-file`, { filePath, fileContent });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data?.error || error.message || 'An error occurred during file explanation';
+    }
+};

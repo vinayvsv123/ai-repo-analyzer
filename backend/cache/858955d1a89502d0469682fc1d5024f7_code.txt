@@ -1,0 +1,48 @@
+\n\n FILE: temp\FUTURE_DS_01\README.md \n# FUTURE_DS_01
+Sales Data Analysis Project
+# 📊 FUTURE_DS_01 – Superstore Sales Data Analysis
+
+## Project Overview
+This project is a real-world sales data analysis task designed to help a business understand revenue trends, top-selling products, high-value categories, and regional profitability. The analysis was performed using Python, Pandas, Matplotlib, and Seaborn.
+
+## Objective
+- Identify which products generate the most revenue
+- Analyze sales trends over time
+- Determine the most profitable categories and regions
+- Provide actionable business insights for growth
+
+## Dataset
+- **Source:** Superstore Sales Dataset (CSV)  
+- **Columns include:** Order ID, Order Date, Product Name, Category, Region, Sales, Profit, etc.  
+- **Cleaned dataset:** `cleaned_superstore.csv`
+
+## Analysis & Outputs
+- **KPI Summary:** Total sales, total profit, total orders, overall profit margin  
+- **Visualizations:**  
+  - `sales_trend.png` – Monthly Sales Trend  
+  - `top_products.png` – Top 10 Products by Sales  
+  - `category_sales.png` – Sales by Category  
+  - `region_profit.png` – Profit by Region  
+  - `sales_vs_profit.png` – Sales vs Profit Scatter Plot  
+
+## Tools Used
+- Python
+- Pandas
+- Matplotlib
+- Seaborn
+- Google Colab
+
+## Key Insights
+1. Certain products are generating the highest revenue — focus marketing on these.  
+2. Some regions are more profitable than others — prioritize top-performing regions.  
+3. Monthly sales show trends that can help in inventory and staffing planning.  
+4. Product categories with low profit margins may need pricing or promotion strategies.  
+
+## How to Use
+1. Open `project_files.ipynb` in Google Colab or Jupyter Notebook  
+2. Run all cells to see the analysis and visualizations  
+3. View charts in `.png` files or inside the notebook  
+
+## Author
+- Name: shaik ammaji
+- Track: Data Science & Analytics – DS  

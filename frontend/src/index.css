@@ -1,25 +1,61 @@
 @import "tailwindcss";
 
+/* ===== THEME TOKENS (Tailwind v4) ===== */
 @theme {
-  --color-primary-500: #3b82f6;
-  --color-dark-900: #0f172a;
-  --color-dark-800: #1e293b;
-  --color-dark-700: #334155;
-  --color-light-100: #f8fafc;
+  /* Primary Green (AI Theme) */
+  --color-primary-500: #10b981;   /* emerald-500 */
+  --color-primary-400: #34d399;
+  --color-primary-300: #6ee7b7;
+
+  /* Dark Background Scale */
+  --color-dark-950: #04110d;
+  --color-dark-900: #061a14;
+  --color-dark-800: #0b2a21;
+  --color-dark-700: #12352a;
+
+  /* Light Text */
+  --color-light-100: #ecfdf5;
 }
 
+/* ===== GLOBAL BODY ===== */
 body {
-    background-color: var(--color-dark-900);
-    color: var(--color-light-100);
-    font-family: 'Inter', system-ui, sans-serif;
-    margin: 0;
-    min-height: 100vh;
+  background: radial-gradient(circle at top left, #0b2a21, #04110d 60%);
+  color: var(--color-light-100);
+  font-family: 'Inter', system-ui, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
+/* ===== GLASS CARD STYLE ===== */
 .glass-card {
-    background: rgba(30, 41, 59, 0.6);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  background: rgba(16, 185, 129, 0.06);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(16, 185, 129, 0.18);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+}
+
+/* ===== SCROLLBAR (THEMED) ===== */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #04110d;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #065f46;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #10b981;
+}
+
+/* ===== SELECTION COLOR ===== */
+::selection {
+  background: #10b981;
+  color: #04110d;
 }
