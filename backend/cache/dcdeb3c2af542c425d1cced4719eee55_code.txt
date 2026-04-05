@@ -1,0 +1,3262 @@
+
+
+ FILE: README.md 
+# ai-repo-analyzer
+
+ FILE: backend/cache/858955d1a89502d0469682fc1d5024f7.json 
+{
+  "projectOverview": "The FUTURE_DS_01 project constitutes a focused, real-world sales data analysis initiative, meticulously crafted to provide deep business intelligence from a Superstore Sales Dataset. Its primary purpose is to empower stakeholders with a clearer understanding of critical revenue trends, identify top-performing products and categories, and pinpoint regional profitability disparities. The project's architecture is fundamentally analytical, centered around a data science workflow executed within an interactive notebook environment, specifically Google Colab or Jupyter. The core user flow involves ingesting raw or pre-cleaned sales data, performing extensive data manipulation and aggregation using Python's Pandas library, and subsequently generating a suite of illustrative visualizations leveraging Matplotlib and Seaborn. These visual outputs, alongside a comprehensive KPI summary, are designed to distill complex sales figures into actionable insights, guiding strategic business decisions related to marketing, inventory management, and regional prioritization. Design decisions emphasize the use of well-established, open-source data science tools for their robustness, community support, and capabilities in handling tabular data and producing high-quality statistical graphics. The project's output culminates in a series of `.png` image files and in-notebook displays, making the analytical findings readily accessible and interpretable for business analysts and decision-makers alike.",
+  "complexityLevel": "Intermediate",
+  "complexityScore": "7.0/10",
+  "techStack": [
+    "Python",
+    "Pandas",
+    "Matplotlib",
+    "Seaborn",
+    "Google Colab",
+    "Jupyter Notebook",
+    "CSV (Data Format)"
+  ],
+  "architecture": "The architectural design of FUTURE_DS_01 deviates from conventional client-server or microservices paradigms, instead adopting a robust, script-based data analysis pipeline characteristic of data science projects. At its core, the system begins with a **Data Source**, explicitly identified as a 'Superstore Sales Dataset' in CSV format, with a pre-cleaned version (`cleaned_superstore.csv`) indicating a preliminary data preparation step. The **Core Processing Engine** is Python, specifically utilizing the Pandas library for comprehensive data ingestion, manipulation, cleaning, transformation, and aggregation. This involves operations such as reading CSV files, filtering data, grouping by various dimensions (e.g., month, category, region), and calculating key performance indicators (KPIs) like total sales, profit, and profit margins. Following data processing, the **Visualization Layer** employs Matplotlib and Seaborn. These libraries are instrumental in generating static, high-quality graphical representations of the analyzed data, including time-series trends, bar charts for top products and categories, and scatter plots to explore relationships between variables. All these computational and visualization tasks are orchestrated and executed within an **Interactive Notebook Environment**, primarily Google Colab or Jupyter Notebook. This environment serves as both the development interface and the execution runtime, allowing for cell-by-cell execution, immediate feedback, and the embedding of visualizations directly alongside code and narrative explanations. The **Output Layer** comprises both in-notebook displays of charts and textual insights, as well as persistent `.png` image files for key visualizations, facilitating shareability and integration into reports. Authentication, authorization, and real-time socket communication layers are entirely absent and conceptually irrelevant to this standalone, script-driven analytical project. The overall system design emphasizes reproducibility of analysis, clear documentation within the notebook, and a streamlined flow from raw data to actionable business insights.",
+  "architectureGraph": {
+    "nodes": [
+      {
+        "id": "data_source",
+        "label": "Superstore Sales Dataset (CSV)",
+        "group": "data_source"
+      },
+      {
+        "id": "data_cleaning",
+        "label": "Data Cleaning (Pandas)",
+        "group": "processing"
+      },
+      {
+        "id": "data_processing",
+        "label": "Data Processing & Aggregation (Pandas)",
+        "group": "processing"
+      },
+      {
+        "id": "kpi_summary",
+        "label": "KPI Summary Generation",
+        "group": "output"
+      },
+      {
+        "id": "visualization",
+        "label": "Visualizations (Matplotlib, Seaborn)",
+        "group": "visualization"
+      },
+      {
+        "id": "notebook_env",
+        "label": "Google Colab / Jupyter Notebook",
+        "group": "environment"
+      },
+      {
+        "id": "output_images",
+        "label": "PNG Image Files",
+        "group": "output"
+      },
+      {
+        "id": "business_insights",
+        "label": "Actionable Business Insights",
+        "group": "output"
+      }
+    ],
+    "edges": [
+      {
+        "source": "data_source",
+        "target": "data_cleaning",
+        "label": "Ingests Raw Data"
+      },
+      {
+        "source": "data_cleaning",
+        "target": "data_processing",
+        "label": "Provides Clean Data"
+      },
+      {
+        "source": "data_processing",
+        "target": "kpi_summary",
+        "label": "Calculates KPIs"
+      },
+      {
+        "source": "data_processing",
+        "target": "visualization",
+        "label": "Feeds Data for Plots"
+      },
+      {
+        "source": "notebook_env",
+        "target": "data_cleaning",
+        "label": "Executes Code"
+      },
+      {
+        "source": "notebook_env",
+        "target": "data_processing",
+        "label": "Executes Code"
+      },
+      {
+        "source": "notebook_env",
+        "target": "visualization",
+        "label": "Executes Code"
+      },
+      {
+        "source": "visualization",
+        "target": "output_images",
+        "label": "Saves Plots"
+      },
+      {
+        "source": "kpi_summary",
+        "target": "business_insights",
+        "label": "Informs Insights"
+      },
+      {
+        "source": "output_images",
+        "target": "business_insights",
+        "label": "Visual Evidence for Insights"
+      },
+      {
+        "source": "notebook_env",
+        "target": "business_insights",
+        "label": "Presents Findings"
+      }
+    ]
+  },
+  "keyFeatures": [
+    "**Sales Data Ingestion and Pre-processing:** The project is designed to ingest a Superstore Sales Dataset, indicated by the presence of a `cleaned_superstore.csv`. This implies robust data loading, and potentially pre-processing or cleaning steps such as handling missing values, correcting data types, or standardizing formats, which are crucial for ensuring the integrity and reliability of subsequent analyses. The use of Pandas would facilitate these operations efficiently.",
+    "**Key Performance Indicator (KPI) Summary Generation:** A fundamental feature is the automatic computation and display of core business KPIs. This includes metrics such as total sales, overall profit, the aggregate number of orders, and the cumulative profit margin. These summary statistics provide an immediate, high-level overview of the business's performance, serving as a foundational element for deeper dives.",
+    "**Time-Series Sales Trend Analysis:** The project includes the capability to analyze and visualize sales trends over time, specifically identifying monthly sales patterns. This feature is invaluable for understanding seasonality, growth trajectories, and identifying specific periods of high or low performance, which aids in inventory planning, staffing adjustments, and marketing campaign timing.",
+    "**Top Product and Category Performance Identification:** The analysis identifies the top 10 products by sales and provides insights into sales distribution across different categories. This feature directly addresses the objective of understanding which products and categories are the primary revenue drivers, enabling targeted marketing efforts, product development focus, and portfolio optimization strategies.",
+    "**Regional Profitability Analysis:** A critical aspect of the project is the breakdown of profit performance by geographical region. This analysis helps in identifying high-performing regions versus those that might be underperforming or even incurring losses. Such insights are crucial for resource allocation, market expansion strategies, and tailoring sales approaches to specific regional dynamics.",
+    "**Sales vs. Profit Relationship Visualization:** The project generates a scatter plot illustrating the relationship between sales and profit. This visualization is key for identifying potential anomalies, such as high-volume products with low profit margins, or conversely, niche products with disproportionately high profitability. It helps in understanding the efficiency of sales efforts in generating actual profit.",
+    "**Actionable Business Insights Extraction:** Beyond raw data and visualizations, a core feature is the synthesis of findings into actionable business insights. The project aims to translate analytical outputs into clear recommendations for growth, such as focusing marketing on high-revenue products, prioritizing profitable regions, and re-evaluating strategies for low-margin categories, providing direct value to business decision-makers."
+  ],
+  "codeQualityReview": "Given that the actual source code (`project_files.ipynb`) is not available for direct inspection, this review is based on inferred best practices for data science projects of this nature and the robust structure indicated by the README. A well-structured data analysis notebook typically adheres to a logical flow: data loading, data cleaning, exploratory data analysis (EDA), visualization, and insight generation. \n\n**Folder Structure and Modularity:** The README suggests a clean separation, with a notebook file, a data file (`cleaned_superstore.csv`), and output visualization files (`.png`). An optimal structure would organize these into `notebooks/`, `data/raw/`, `data/processed/`, and `reports/figures/`. For larger projects, custom functions for data cleaning or specific analyses would be abstracted into separate Python modules (e.g., `src/data_processing.py`, `src/visualization.py`) and imported into the notebook, promoting reusability and testability. This approach enhances modularity significantly. \n\n**Separation of Concerns:** In an ideal notebook, distinct cells or sections would handle specific tasks: one for imports, another for data loading, subsequent ones for cleaning, then analysis, and finally visualization. This clear separation prevents monolithic code blocks and makes the analysis easier to follow, debug, and maintain. For example, a cell dedicated solely to calculating KPIs should not also contain visualization code for monthly trends. \n\n**Naming Conventions and Readability:** Variable names should be descriptive (e.g., `monthly_sales_df` instead of `df1`). Function names should clearly indicate their purpose. Extensive comments within complex logic, and markdown cells for narrative explanations and summarizing findings, are crucial for readability and reproducibility, especially in a collaborative environment or for future self-reference. \n\n**Patterns and Best Practices:** Data science notebooks benefit greatly from patterns like the 'pipeline' approach, where data transformations are chained logically. Using `pd.options.display` settings for better DataFrame output, consistently handling potential errors (e.g., file not found, data type issues), and ensuring that all necessary libraries are imported at the beginning of the notebook are standard best practices. The project's mention of a `cleaned_superstore.csv` implies a data cleaning phase, which is a critical best practice for robust analysis. Version control (e.g., Git) for the notebook and any auxiliary scripts, along with tracking the dataset version, would elevate the project's professionalism and reproducibility considerably. Without the actual code, it's impossible to verify the implementation quality of these practices, but their adherence is paramount for an 'Advanced' rating.",
+  "securityAnalysis": "For a data analysis project focused on a static dataset within a notebook environment, the security considerations significantly differ from those of a typical web application involving user authentication, database interactions, or public-facing APIs. \n\n**Data Privacy and Handling:** The primary security concern revolves around the sensitivity of the 'Superstore Sales Dataset'. If this dataset contained Personally Identifiable Information (PII) of customers or sensitive business financials, then robust data anonymization, pseudonymization, or access controls would be paramount. The `README` does not specify the presence of PII, but generally, sales data could contain customer names, addresses, or payment details. Assuming 'Superstore Sales' implies aggregated or anonymized commercial data, this risk might be mitigated. However, handling and storage of the `cleaned_superstore.csv` file should adhere to organizational data governance policies, especially regarding where it's stored (local machine vs. cloud storage) and who has access. \n\n**Notebook Environment Security:** Running notebooks (Jupyter, Colab) on a secure and updated environment is crucial. This includes ensuring the underlying operating system and Python environment are patched against known vulnerabilities. Dependency management (e.g., using `requirements.txt` with pinned versions) helps prevent supply chain attacks where malicious code could be introduced via a compromised library. If Google Colab is used, understanding Google's security posture for data processing and storage is important. \n\n**No User Authentication/Authorization:** As this is a standalone analytical script, concepts like password handling, JWT, OAuth, or protected routes are not applicable. There is no 'user' interacting with a service endpoint that requires authentication; rather, a developer or data analyst directly executes the code. \n\n**Input Validation (for data):** While not 'security' in the traditional sense, robust data validation during the loading and cleaning phase (e.g., checking data types, ranges, uniqueness) is critical for data integrity and preventing logical flaws in the analysis. Malformed input, whether accidental or malicious (if the data source were untrusted), could lead to incorrect conclusions or runtime errors. \n\nIn summary, the security posture for this project focuses on data governance, secure environment practices, and data integrity rather than typical application-layer security mechanisms.",
+  "improvements": [
+    "**Interactive Visualizations:** Instead of static Matplotlib/Seaborn plots, integrate interactive visualization libraries such as Plotly, Bokeh, or Altair. This would allow users to zoom, pan, hover for details, and filter data directly within the notebook, significantly enhancing exploratory data analysis and user engagement.",
+    "**Advanced Statistical Analysis or Predictive Modeling:** Extend the project beyond descriptive analysis to include inferential statistics or predictive modeling. For instance, implement time-series forecasting (e.g., ARIMA, Prophet) for future sales prediction, or customer segmentation using clustering algorithms based on purchasing behavior.",
+    "**Automated Reporting and Dashboarding:** Develop an automated mechanism to generate periodic reports (e.g., PDF, HTML) based on the analysis. Alternatively, integrate the insights into an interactive dashboard using tools like Streamlit, Dash, or even commercial BI tools like Tableau or Power BI, allowing business users to explore data dynamically without running the notebook.",
+    "**Parameterization and Reusability:** Parameterize the notebook to easily run the analysis for different time periods, product categories, or regions without modifying the code. This could be achieved using tools like Papermill for Jupyter notebooks or by defining a configuration section at the beginning of the notebook.",
+    "**Data Version Control (DVC):** Implement Data Version Control (DVC) alongside Git to manage different versions of the `cleaned_superstore.csv` dataset and any intermediate processed data. This ensures reproducibility of results and provides a clear history of data changes, which is crucial for auditing and collaboration.",
+    "**Unit Testing for Data Processing Logic:** For critical data cleaning and aggregation functions (especially if externalized into Python modules), implement unit tests. This ensures the robustness and correctness of the data transformations, preventing subtle bugs that could lead to erroneous insights.",
+    "**Error Handling and Robustness:** Enhance error handling within the notebook to gracefully manage scenarios like missing files, malformed data, or unexpected data types. This makes the analysis more robust and user-friendly, providing informative messages instead of crashing.",
+    "**Documentation and Metadata:** Improve internal documentation by adding more comprehensive markdown cells explaining the rationale behind each analysis step, the interpretation of each visualization, and the implications of the findings. Incorporate metadata within the notebook cells for better organization and navigation."
+  ],
+  "resumeDescription": "Led a comprehensive Superstore Sales Data Analysis project utilizing Python, Pandas, Matplotlib, and Seaborn to uncover critical business insights. Developed a robust analytical pipeline, generating KPI summaries, monthly sales trends, top product identification, and regional profitability analyses. Delivered actionable recommendations to optimize marketing strategies, inventory planning, and drive revenue growth through data-driven decision-making.",
+  "metrics": {
+    "totalFiles": 1,
+    "languages": [
+      ".md"
+    ],
+    "linesOfCode": 1,
+    "maxFolderDepth": 0,
+    "largestModule": {
+      "name": "README.md",
+      "sizeLines": 1
+    }
+  }
+}
+
+ FILE: backend/cache/a917d53abfb4878ea863116a28c6a967.json 
+{
+  "projectOverview": "DevConnect is a full-stack MERN (MongoDB, Express.js, React, Node.js) application designed to foster collaboration and networking among students and developers. Its core purpose is to provide a platform where users can explore and post software projects, connect with other developers, and engage in real-time chat for collaboration. The application features robust user authentication, including traditional email/password registration and login, as well as modern OAuth integrations with Google and GitHub, enhancing accessibility and user experience. Users can manage their profiles, showcasing their skills, bio, and portfolio links. The project emphasizes a component-based architecture on the frontend using React and a modular, MVC-inspired structure on the backend with Express.js. Real-time communication is powered by Socket.io, enabling instant messaging between connected users. The design decisions prioritize a clean, dark-themed user interface with Tailwind CSS for rapid styling and responsiveness, aiming for an intuitive and engaging experience for technical users. Data persistence is managed by MongoDB, providing a flexible NoSQL database solution for dynamic project and user data.",
+  "complexityLevel": "Intermediate",
+  "complexityScore": "7.5/10",
+  "techStack": [
+    "Node.js",
+    "Express.js",
+    "MongoDB",
+    "Mongoose",
+    "React.js",
+    "Vite",
+    "Socket.io (server and client)",
+    "JSON Web Tokens (JWT)",
+    "Bcrypt.js",
+    "CORS",
+    "Dotenv",
+    "Nodemailer",
+    "Crypto",
+    "Axios",
+    "React Router DOM",
+    "Tailwind CSS",
+    "Lucide React (icons)",
+    "@react-oauth/google (for Google OAuth)",
+    "ESLint"
+  ],
+  "architecture": "The application employs a classic client-server architecture with a clear separation between the frontend (React) and backend (Node.js/Express). \n\n**Frontend Architecture:**\nThe frontend is built using React with Vite for fast development and bundling. It leverages `react-router-dom` for client-side routing, defining protected routes that require user authentication via JWT. The UI components are styled using Tailwind CSS, providing a utility-first approach for design. State management is primarily localized within components, with `localStorage` used for persisting the authentication token. API interactions are encapsulated within a `services/api.js` file, centralizing all HTTP requests. Real-time chat functionality is handled by `socket.io-client`, managed in `services/socket.js`, which connects to the backend Socket.io server. OAuth flows for Google are managed by `@react-oauth/google`, while GitHub OAuth is initiated by redirecting to GitHub and then handled by the backend.\n\n**Backend Architecture:**\nThe backend is built with Node.js and Express.js, following a modular structure that somewhat adheres to an MVC-like pattern: \n-   **`app.js`**: Initializes the Express application, configures global middleware like `cors` and `express.json()`, and mounts various route modules.\n-   **`index.js`**: The primary entry point, responsible for loading environment variables (`dotenv`), connecting to MongoDB (`connectDB`), setting up the HTTP server, and initializing the Socket.io server. It also contains the core Socket.io event handling logic, including user registration, message relaying, and managing online user status.\n-   **`src/config`**: Contains `db.js` for MongoDB connection logic. A `passport.js` file exists but is not actively used for authentication through the main `userRoutes.js`.\n-   **`src/models`**: Defines Mongoose schemas for `User`, `Project`, and `Message`, mapping application data to MongoDB collections and enforcing data structure.\n-   **`src/controllers`**: Contains the business logic for handling requests, such as user authentication, profile management, project CRUD operations, and chat message handling. Controllers interact with Mongoose models to perform database operations.\n-   **`src/routes`**: Defines API endpoints and maps them to corresponding controller functions. Routes are modularized for users, projects, and chats.\n-   **`src/middleware`**: Includes `authMiddleware.js` for JWT verification, securing protected API routes.\n\n**Database Schema:**\nMongoDB is used as the database. Key schemas include:\n-   **`User`**: Stores `username`, `email`, `password` (hashed), `bio`, `profilePicture`, `skills`, `githubUrl`, `portfolioUrl`, `location`, `resetPasswordToken`, `resetPasswordExpire`, and `timestamps`.\n-   **`Project`**: Stores `title`, `description`, `skills` (array of strings), `postedBy` (reference to `User`), and `timestamps`.\n-   **`Message`**: Stores `sender` (reference to `User`), `receiver` (reference to `User`), `text`, `read` status, and `timestamps`.\n\n**Authentication Flow:**\n-   **Local Auth**: Users register with `username`, `email`, and `password`. Passwords are `bcryptjs` hashed. Login verifies credentials and issues a JWT signed with `process.env.JWT_SECRET`, valid for 1 hour. This token is stored in `localStorage` on the client.\n-   **JWT Authorization**: All protected API routes utilize `authMiddleware` to verify the JWT present in the `Authorization` header. If valid, `req.user.userId` is populated.\n-   **Google OAuth**: Frontend uses `@react-oauth/google` to get an `id_token`. This token is sent to the backend, which manually verifies it using Google's `tokeninfo` endpoint (via `axios`). If valid, an existing user is found/created, and a JWT is issued.\n-   **GitHub OAuth**: Frontend initiates a redirect to GitHub. GitHub redirects back with a `code`. The backend exchanges this `code` for an `accessToken` with GitHub's API (via `axios`). It then fetches user data and emails from GitHub's API. An existing user is found/created, and a JWT is issued, then the client is redirected with the token as a URL parameter.\n-   **Password Reset**: A `forgotPassword` endpoint generates a secure, hashed `resetPasswordToken` and `resetPasswordExpire` timestamp for the user in the database. A reset link (containing the raw token) is generated and simulated to be emailed to the user (with Nodemailer supporting test accounts or configured SMTP). The `resetPassword` endpoint verifies this token, hashes the new password, and clears the token fields.\n\n**API Flow:**\nFrontend `api.js` makes `fetch` or `axios` requests to backend endpoints (e.g., `/api/users/register`, `/api/projects`, `/api/chats/:userId`). The backend Express app routes these requests to specific controller functions after potential `authMiddleware` execution. Controllers interact with Mongoose models for database operations and return JSON responses.\n\n**Socket Flow:**\nSocket.io is used for real-time chat:\n1.  **Connection**: When a user logs in, the frontend `connectSocket(userId)` establishes a WebSocket connection.\n2.  **Registration**: On `connect`, the client `emit('register', userId)` to the server. The server stores this `userId`-to-`socket.id` mapping in `userSocketMap`.\n3.  **Online Status**: The server `emit('onlineUsers', Array.from(userSocketMap.keys()))` to all connected clients when a user connects or disconnects, updating online status.\n4.  **Sending Messages**: Client `emit('sendMessage', messageData)` to the server. The server looks up the `receiverId`'s socket ID in `userSocketMap`. If found, it `io.to(receiverSocketId).emit('receiveMessage', messageData)` to the specific receiver.\n5.  **Receiving Messages**: Clients listen for `socket.on('receiveMessage', ...)` to update their chat UI. Messages are also persisted to the MongoDB `Message` collection via a separate HTTP `sendMessageHTTP` call to `/api/chats` as a fallback/persistence mechanism.\n\n**Overall System Design:**\nThe system architecture provides a robust foundation for a social collaboration platform. The modular design aids in maintainability and scalability, with clear responsibilities for frontend, backend API, database, and real-time communication. The use of JWT for stateless authentication allows for scalable user session management, while OAuth streamlines the login process. The real-time chat component significantly enhances user interaction and collaboration capabilities. Error handling is present within individual routes/controllers but could be further centralized for consistency. Frontend data fetching relies on `fetch` and `axios` with local storage for auth tokens. The dual persistence for chat messages (Socket.io for real-time, HTTP for database) ensures reliability.",
+  "architectureGraph": {
+    "nodes": [
+      {
+        "id": "frontend",
+        "label": "React Frontend",
+        "group": "frontend"
+      },
+      {
+        "id": "authPage",
+        "label": "Auth Page",
+        "group": "frontend"
+      },
+      {
+        "id": "explorePage",
+        "label": "Explore Page",
+        "group": "frontend"
+      },
+      {
+        "id": "profilePage",
+        "label": "Profile Page",
+        "group": "frontend"
+      },
+      {
+        "id": "chatPage",
+        "label": "Chat Page",
+        "group": "frontend"
+      },
+      {
+        "id": "backendApp",
+        "label": "Express App (app.js)",
+        "group": "backend"
+      },
+      {
+        "id": "backendServer",
+        "label": "Node.js Server (index.js)",
+        "group": "backend"
+      },
+      {
+        "id": "userRoutes",
+        "label": "User Routes",
+        "group": "backend"
+      },
+      {
+        "id": "projectRoutes",
+        "label": "Project Routes",
+        "group": "backend"
+      },
+      {
+        "id": "chatRoutes",
+        "label": "Chat Routes",
+        "group": "backend"
+      },
+      {
+        "id": "userController",
+        "label": "User Controller",
+        "group": "backend"
+      },
+      {
+        "id": "projectController",
+        "label": "Project Controller",
+        "group": "backend"
+      },
+      {
+        "id": "chatController",
+        "label": "Chat Controller",
+        "group": "backend"
+      },
+      {
+        "id": "authMiddleware",
+        "label": "Auth Middleware",
+        "group": "auth"
+      },
+      {
+        "id": "jwt",
+        "label": "JWT",
+        "group": "auth"
+      },
+      {
+        "id": "googleOAuth",
+        "label": "Google OAuth",
+        "group": "auth"
+      },
+      {
+        "id": "githubOAuth",
+        "label": "GitHub OAuth",
+        "group": "auth"
+      },
+      {
+        "id": "socketServer",
+        "label": "Socket.io Server",
+        "group": "socket"
+      },
+      {
+        "id": "socketClient",
+        "label": "Socket.io Client",
+        "group": "socket"
+      },
+      {
+        "id": "db",
+        "label": "MongoDB Database",
+        "group": "database"
+      },
+      {
+        "id": "userModel",
+        "label": "User Model",
+        "group": "database"
+      },
+      {
+        "id": "projectModel",
+        "label": "Project Model",
+        "group": "database"
+      },
+      {
+        "id": "messageModel",
+        "label": "Message Model",
+        "group": "database"
+      }
+    ],
+    "edges": [
+      {
+        "source": "frontend",
+        "target": "backendApp",
+        "label": "HTTP/REST API"
+      },
+      {
+        "source": "frontend",
+        "target": "socketClient",
+        "label": "Socket.io Connect"
+      },
+      {
+        "source": "socketClient",
+        "target": "socketServer",
+        "label": "Real-time Events"
+      },
+      {
+        "source": "backendServer",
+        "target": "backendApp",
+        "label": "Uses Express App"
+      },
+      {
+        "source": "backendServer",
+        "target": "db",
+        "label": "Connects MongoDB"
+      },
+      {
+        "source": "backendServer",
+        "target": "socketServer",
+        "label": "Hosts Socket.io"
+      },
+      {
+        "source": "backendApp",
+        "target": "userRoutes",
+        "label": "/api/users"
+      },
+      {
+        "source": "backendApp",
+        "target": "projectRoutes",
+        "label": "/api/projects"
+      },
+      {
+        "source": "backendApp",
+        "target": "chatRoutes",
+        "label": "/api/chats"
+      },
+      {
+        "source": "backendApp",
+        "target": "db",
+        "label": "Connect DB (Mongoose)"
+      },
+      {
+        "source": "userRoutes",
+        "target": "userController",
+        "label": "Handles Logic"
+      },
+      {
+        "source": "projectRoutes",
+        "target": "projectController",
+        "label": "Handles Logic"
+      },
+      {
+        "source": "chatRoutes",
+        "target": "chatController",
+        "label": "Handles Logic"
+      },
+      {
+        "source": "userController",
+        "target": "userModel",
+        "label": "CRUD Operations"
+      },
+      {
+        "source": "projectController",
+        "target": "projectModel",
+        "label": "CRUD Operations"
+      },
+      {
+        "source": "chatController",
+        "target": "messageModel",
+        "label": "CRUD Operations"
+      },
+      {
+        "source": "chatController",
+        "target": "userModel",
+        "label": "Reads User Info"
+      },
+      {
+        "source": "userRoutes",
+        "target": "authMiddleware",
+        "label": "Protects Routes"
+      },
+      {
+        "source": "projectRoutes",
+        "target": "authMiddleware",
+        "label": "Protects POST Route"
+      },
+      {
+        "source": "chatRoutes",
+        "target": "authMiddleware",
+        "label": "Protects Routes"
+      },
+      {
+        "source": "authMiddleware",
+        "target": "jwt",
+        "label": "Verifies Token"
+      },
+      {
+        "source": "jwt",
+        "target": "userController",
+        "label": "Generates Tokens"
+      },
+      {
+        "source": "authPage",
+        "target": "userRoutes",
+        "label": "Login/Register/OAuth Calls"
+      },
+      {
+        "source": "explorePage",
+        "target": "projectRoutes",
+        "label": "Fetches Projects"
+      },
+      {
+        "source": "explorePage",
+        "target": "userRoutes",
+        "label": "Posts Projects (via AddProject)"
+      },
+      {
+        "source": "profilePage",
+        "target": "userRoutes",
+        "label": "Fetches/Updates Profile"
+      },
+      {
+        "source": "chatPage",
+        "target": "chatRoutes",
+        "label": "HTTP Message Fallback"
+      },
+      {
+        "source": "chatPage",
+        "target": "userRoutes",
+        "label": "Fetches All Users"
+      },
+      {
+        "source": "chatPage",
+        "target": "socketClient",
+        "label": "Sends/Receives Messages"
+      },
+      {
+        "source": "userController",
+        "target": "googleOAuth",
+        "label": "Handles Google Auth"
+      },
+      {
+        "source": "userController",
+        "target": "githubOAuth",
+        "label": "Handles GitHub Auth"
+      },
+      {
+        "source": "googleOAuth",
+        "target": "backendApp",
+        "label": "Redirects via API"
+      },
+      {
+        "source": "githubOAuth",
+        "target": "backendApp",
+        "label": "Redirects via API"
+      },
+      {
+        "source": "socketServer",
+        "target": "userModel",
+        "label": "Maps User Sockets"
+      },
+      {
+        "source": "socketServer",
+        "target": "messageModel",
+        "label": "Implicitly related (messages saved via HTTP)"
+      },
+      {
+        "source": "userModel",
+        "target": "db",
+        "label": "Stores User Data"
+      },
+      {
+        "source": "projectModel",
+        "target": "db",
+        "label": "Stores Project Data"
+      },
+      {
+        "source": "messageModel",
+        "target": "db",
+        "label": "Stores Message Data"
+      }
+    ]
+  },
+  "keyFeatures": [
+    "**User Authentication & Authorization**: Implements secure user registration and login with `bcryptjs` for password hashing and JSON Web Tokens (JWT) for session management. Protected routes ensure that only authenticated users can access sensitive functionalities like profile management, project creation, and real-time chat.",
+    "**Google and GitHub OAuth Integration**: Provides seamless login and registration through popular third-party services like Google and GitHub. This enhances user convenience by reducing friction in the signup process and leveraging trusted identity providers.",
+    "**User Profile Management**: Allows users to create and update detailed profiles, including a bio, profile picture, location, skills, and links to their GitHub and portfolio. This feature enables developers to showcase their abilities and provides context for collaboration.",
+    "**Project Discovery and Creation**: Facilitates a platform for developers to post new projects, detailing their title, description, and required skills. Other users can explore these projects, fostering an environment for finding collaborators and contributing to new initiatives.",
+    "**Real-time Instant Messaging (Chat)**: Incorporates `Socket.io` for live, one-on-one instant messaging between users. This enables immediate communication, crucial for project collaboration and networking, with an online status indicator for users.",
+    "**Password Reset Functionality**: Includes a mechanism for users to reset forgotten passwords securely. Although the email sending is currently simulated with Nodemailer's test account capabilities or requires SMTP configuration, the backend logic for token generation and verification is in place.",
+    "**Responsive User Interface**: The frontend is built with React and styled using Tailwind CSS, ensuring a modern, responsive, and visually appealing interface across various devices. This improves accessibility and user experience.",
+    "**Modular Backend API Design**: The backend is structured into distinct routes, controllers, and models, promoting separation of concerns and maintainability. This modularity makes it easier to understand, extend, and debug different parts of the application."
+  ],
+  "codeQualityReview": "The repository demonstrates a generally solid foundation for a MERN stack application, but with areas for refinement.\n\n**Folder Structure and Modularity**: The backend follows a fairly standard and logical Express.js project structure (`src/config`, `src/controllers`, `src/middleware`, `src/models`, `src/routes`). This separation of concerns is commendable, placing database configuration, business logic, authentication logic, data schemas, and API endpoints into their respective directories. Similarly, the frontend is organized into `components`, `pages`, and `services`, which promotes reusability and clarity. However, the presence of `backend/src/controllers/forgotpasswordController.js`, `backend/src/controllers/resetpasswordController.js`, `backend/src/config/passport.js`, and `backend/src/routes/auth.js` which appear to be unused or superseded by implementations in `userController.js` and `userRoutes.js`, indicates some inconsistency or remnants of prior development efforts. This code duplication and lack of clarity on active components can lead to confusion and maintenance overhead.\n\n**Separation of Concerns**: Controllers are generally responsible for handling request/response and orchestrating data flow, while models manage database interactions, which is good. Middleware specifically handles authentication. However, the `index.js` file on the backend not only sets up the server and database but also contains all Socket.io logic, including user management and message relay. While functional for a smaller application, this could be refactored into a dedicated Socket.io service or module for better organization as the real-time features grow. The frontend `Auth.jsx` contains significant logic for handling form submissions and OAuth redirects, which could benefit from more granular custom hooks or a dedicated authentication context/service.\n\n**Naming Conventions**: Variable, function, and file names generally adhere to common JavaScript conventions (camelCase, PascalCase for components/models). Route paths and API endpoints are clear and RESTful where applicable (e.g., `/api/users`, `/api/projects/:id`).\n\n**Patterns and Best Practices**: The project utilizes modern JavaScript features (ESM imports/exports), `dotenv` for environment variables, and `cors` for cross-origin resource sharing, which are good practices. The use of `async/await` for asynchronous operations improves readability. Frontend components like `ProtectedRoute` correctly enforce authentication at the route level. The `api.js` service centralizes API calls, which is beneficial. However, error handling often relies on generic `catch` blocks returning 'Server error' or `alert()` messages on the frontend, which could be more descriptive and user-friendly.\n\n**Code Redundancy**: The `forgotPassword` and `resetPassword` functions are duplicated across `src/controllers/userController.js` and `src/controllers/forgotpasswordController.js`/`src/controllers/resetpasswordController.js`. Furthermore, the Passport.js related files (`passport.js` and `routes/auth.js`) are present but not used, as GitHub OAuth is implemented manually in `userController.js`. This redundancy should be addressed to ensure a single source of truth for each functionality and to remove dead code.\n\n**Frontend Specifics**: The use of Tailwind CSS for styling is a modern and efficient approach. `GoogleOAuthProvider` is correctly integrated. The `ChatPage` effectively manages multiple states for users, messages, and online status. The lack of a global state management solution (like React Context or Redux) is noticeable, though not strictly required for an application of this current size, it could become a maintenance challenge as the application scales. The placeholder `ProjectDetailPage` indicates incomplete features.",
+  "securityAnalysis": "The security implementation demonstrates a reasonable baseline for a web application, incorporating several crucial practices, but also has areas for strengthening.\n\n**Password Handling**: Passwords are appropriately hashed using `bcryptjs` with a default salt round of 10. This is a fundamental best practice against rainbow table attacks. The `user.model.js` schema does not enforce `password: { required: true }`, which is correct for handling users created via OAuth without a local password, but means any locally registered user without a password would bypass this. Frontend needs stronger password complexity validation.\n\n**JWT (JSON Web Tokens)**: JWTs are used for authentication and session management. They are signed with `process.env.JWT_SECRET` and have an expiry time ('1h'). The `authMiddleware` correctly validates these tokens by checking the `Authorization` header and verifying the signature. However, the `githubOAuth` function in `userController.js` uses `process.env.JWT_SECRET || 'dev_secret_key'` as a fallback. This fallback is a critical security vulnerability if `JWT_SECRET` is not set in production, as it defaults to a weak, hardcoded secret, making tokens easily forgeable.\n\n**OAuth (Google and GitHub)**: Both Google and GitHub OAuth are implemented. For Google, the backend manually verifies the `id_token` by making a request to Google's `tokeninfo` endpoint, which is a correct and secure way to validate the token server-side without relying on client-side trust. For GitHub, the backend directly exchanges the authorization `code` for an `access_token` and then uses this token to fetch user data from GitHub's API. This server-side token exchange is secure. The `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` are correctly loaded from environment variables. However, the `callbackURL` for GitHub in `passport.js` (an unused file) points to `http://localhost:5000/auth/github/callback`, which isn't dynamically configurable and implies it was intended for local development only. The active `githubOAuth` implementation in `userController.js` redirects to `http://localhost:5173/auth?token=${token}`, which exposes the JWT directly in the URL, making it vulnerable to URL sniffing and browser history. A better approach would be to set an HttpOnly cookie or redirect to a page that fetches the token via a secure API call.\n\n**Protected Routes**: The `authMiddleware` is correctly applied to routes requiring authentication (e.g., `/api/users/profile`, `/api/projects` POST, `/api/chats`). This prevents unauthorized access to sensitive operations and data.\n\n**Input Validation**: Basic input validation exists, such as checking for empty fields (`!username || !email || !password`) on registration and password reset. The `User` model includes a regex for email format matching. However, more comprehensive validation (e.g., password strength, maximum length for text fields, sanitization of user inputs to prevent XSS attacks) is largely absent in the controllers. This could lead to malformed data in the database or injection vulnerabilities.\n\n**CORS Configuration**: CORS is correctly configured in `app.js` and `index.js` (for Socket.io) to allow specific origins (`http://localhost:5173`, `https://dveconect-52tl.vercel.app`, `https://dveconect-gv4m.vercel.app`, `https://devconect-1.onrender.com`), limiting access to known frontend deployments. This is a good practice to prevent cross-site request forgery (CSRF) for simple requests, though for full protection, CSRF tokens might be needed depending on interaction types.\n\n**Environment Variables**: `dotenv` is used to load sensitive information, which is appropriate. However, as noted, the fallback `dev_secret_key` for `JWT_SECRET` in `userController.js` is a significant oversight. SMTP credentials for Nodemailer are also expected from environment variables.\n\n**Sensitive Data Handling**: `resetPasswordToken` is hashed before being stored in the database, preventing direct exposure of the raw token if the database is compromised. However, the frontend calls for password reset (`/api/users/forgot-password` and `/api/users/reset-password/:token`) are currently commented out in `userRoutes.js`, meaning the password reset functionality is inaccessible through the main API. The `console.log` of the reset token for `email` in `forgotPasswordController.js` (which is itself an unused controller) is a security anti-pattern if used in production, as it leaks sensitive information to logs.\n\n**Overall**: While the project implements several key security measures, particularly in password hashing and OAuth token validation, it needs critical attention to default secret keys, more robust input validation, secure handling of JWTs post-GitHub OAuth, and ensuring all intended security features (like password reset) are actually exposed and correctly configured.",
+  "improvements": [
+    "**Resolve Backend Code Duplication & Unused Files**: Remove or integrate `backend/src/controllers/forgotpasswordController.js`, `backend/src/controllers/resetpasswordController.js`, `backend/src/config/passport.js`, and `backend/src/routes/auth.js`. Consolidate all password reset and GitHub OAuth logic into `userController.js` and `userRoutes.js` respectively, ensuring only one implementation exists.",
+    "**Enable and Test Password Reset Flow**: Uncomment the `/forgot-password` and `/reset-password/:token` routes in `backend/src/routes/userRoutes.js` and ensure the frontend `Auth.jsx` and `ResetPassword.jsx` pages correctly interact with these endpoints. Configure Nodemailer with actual SMTP credentials for production use.",
+    "**Implement Robust Input Validation**: Utilize a validation library like Joi or Yup on the backend for all incoming request bodies (e.g., user registration, profile updates, project creation, chat messages). This should go beyond simple existence checks to include data type, format (e.g., valid URL, strong password regex), and length constraints. Sanitize inputs to prevent XSS.",
+    "**Enhance Password Security**: Enforce stronger password policies on the frontend and backend (e.g., minimum length, mix of characters). Consider using Argon2 or Scrypt over Bcrypt for future-proofing, although Bcrypt is generally considered secure for now.",
+    "**Secure JWT Handling after GitHub OAuth**: Instead of redirecting with the JWT in the URL (`/auth?token=${token}`), redirect to a secure page that triggers an API call to retrieve the token via an HttpOnly cookie or a POST request, or have the backend set an HttpOnly cookie directly after successful GitHub OAuth.",
+    "**Centralize Error Handling**: Implement a global error handling middleware in Express.js to catch all unhandled errors and send consistent, structured error responses to the client. Frontend error messages should be more specific and user-friendly, rather than generic `alert('Error...')`.",
+    "**Add Rate Limiting**: Implement rate limiting on authentication endpoints (login, register, forgot password) and possibly other resource-intensive APIs to prevent brute-force attacks and denial-of-service.",
+    "**Implement Security Headers**: Use the `helmet` middleware in Express.js to automatically set various HTTP headers that improve application security (e.g., X-XSS-Protection, Strict-Transport-Security, X-Frame-Options).",
+    "**Strengthen `JWT_SECRET` Management**: Ensure `process.env.JWT_SECRET` is always properly loaded in production and remove the hardcoded fallback `'dev_secret_key'` from `userController.js` to prevent critical security vulnerabilities.",
+    "**Improve Backend Logging**: Integrate a more robust logging library (e.g., Winston, Morgan) for comprehensive server-side logging, especially for errors, API requests, and critical security events. Remove `console.log` statements that expose sensitive data.",
+    "**Refactor Socket.io Logic**: Extract the Socket.io event handling from `index.js` into its own dedicated module (e.g., `src/services/socketService.js`) to improve modularity and maintainability of the real-time communication aspect.",
+    "**Frontend State Management**: For potential scalability and ease of managing application-wide state (like user authentication status, online users list), consider introducing a global state management solution such as React Context API or a library like Zustand/Redux.",
+    "**Add Backend and Frontend Tests**: Implement unit and integration tests for critical backend API endpoints (authentication, CRUD operations) and frontend components/pages to ensure reliability and prevent regressions.",
+    "**Complete `ProjectDetailPage`**: Develop the content and functionality for the `ProjectDetailPage` to provide detailed views of individual projects.",
+    "**Enhance Project & User Discovery**: Implement search and filtering capabilities for projects (by skills, title) and users (by username, skills) to improve the utility of the explore and chat features."
+  ],
+  "resumeDescription": "Developed a full-stack MERN application, DevConnect, enabling developers to discover projects, connect, and collaborate via real-time chat. Implemented robust JWT-based authentication, complemented by Google and GitHub OAuth, and user profile management. Designed a modular backend API with Express.js and MongoDB, alongside a responsive React frontend utilizing Socket.io for real-time communication. Engineered secure password handling and managed cross-origin resource sharing, demonstrating proficiency in scalable and interactive web development.",
+  "metrics": {
+    "totalFiles": 46,
+    "languages": [
+      ".js",
+      ".json",
+      ".md",
+      ".html",
+      ".css",
+      ".jsx"
+    ],
+    "linesOfCode": 49,
+    "maxFolderDepth": 3,
+    "largestModule": {
+      "name": "userController.js",
+      "sizeLines": 4
+    }
+  }
+}
+
+ FILE: backend/controllers/repoController.js 
+import { cloneRepo } from '../utils/cloneRepo.js';
+import { readRepoFiles } from '../utils/readFiles.js';
+import { analyzeCodeWithAI, chatWithRepo, explainFileWithAI } from '../services/aiServices.js';
+import { getSocket } from '../sockets/socketService.js';
+import { getCachedResult, setCachedResult, getCachedCode, setCachedCode, getCachedFiles, setCachedFiles } from '../utils/cacheService.js';
+import fs from 'fs-extra';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+const MAX_CODE_LENGTH = 3000000;
+
+export const analyzeRepo = async (req, res) => {
+    console.log("Received analyze request for repo:", req.body.repoUrl);
+    const io = getSocket();
+    let localPath = null;
+    
+    try {
+        const { repoUrl, socketId } = req.body;
+        
+        if (!repoUrl || !repoUrl.includes("github.com")) {
+            return res.status(400).json({ error: 'Valid GitHub Repository URL is required' });
+        }
+
+        const cachedSummary = await getCachedResult(repoUrl);
+        if (cachedSummary) {
+            console.log("Returning cached result for", repoUrl);
+            const cachedFilesData = await getCachedFiles(repoUrl);
+
+            io.to(socketId).emit('progress', { step: 'cloning_started', message: 'Using cached repository data...' });
+            setTimeout(() => io.to(socketId).emit('progress', { step: 'reading_files', message: 'Loading cache...' }), 500);
+            setTimeout(() => io.to(socketId).emit('progress', { step: 'analyzing_code', message: 'Restoring AI analysis...' }), 1000);
+            setTimeout(() => io.to(socketId).emit('progress', { step: 'analysis_completed', message: 'Ready' }), 1500);
+            
+            return setTimeout(() => res.json({
+                message: 'Cached repository analyzed',
+                summary: cachedSummary,
+                fileTree: cachedFilesData?.fileTree || [],
+                filesDatabase: cachedFilesData?.filesDatabase || {}
+            }), 1600);
+        }
+
+        io.to(socketId).emit('progress', { step: 'cloning_started', message: 'Cloning repository...' });
+        console.log("Cloning repository:", repoUrl);
+
+        localPath = await cloneRepo(repoUrl);
+        
+        io.to(socketId).emit('progress', { step: 'cloning_completed', message: 'Cloned successfully' });
+        io.to(socketId).emit('progress', { step: 'reading_files', message: 'Reading project files & calculating metrics...' });
+        console.log("Reading files from:", localPath);
+
+        const { allCode: rawRepoCode, metrics, fileTree, filesDatabase } = await readRepoFiles(localPath);
+        let repoCode = rawRepoCode;
+
+        if (!repoCode || repoCode.trim().length === 0) {
+            throw new Error('Repository is empty or unreadable.');
+        }
+
+        await setCachedCode(repoUrl, repoCode);
+        await setCachedFiles(repoUrl, { fileTree, filesDatabase });
+
+        if (repoCode.length > MAX_CODE_LENGTH) {
+            repoCode = repoCode.substring(0, MAX_CODE_LENGTH) + '\\n...[TRUNCATED]';
+        }
+
+        io.to(socketId).emit('progress', { step: 'analyzing_code', message: 'AI is analyzing code & generating architecture...' });
+        
+        let aiSummary = await analyzeCodeWithAI(repoCode);
+        
+        aiSummary.metrics = metrics;
+
+        await setCachedResult(repoUrl, aiSummary);
+
+        io.to(socketId).emit('progress', { step: 'analysis_completed', message: 'Analysis ready' });
+        console.log("AI analysis completed, sending response");
+
+        res.json({
+            message: 'Repository analyzed successfully',
+            summary: aiSummary,
+            fileTree,
+            filesDatabase
+        });
+        
+    } catch (error) {
+        console.error('Error analyzing repository:', error);
+        
+        const socketId = req.body.socketId;
+        if (socketId) {
+            const io = getSocket();
+            io.to(socketId).emit('progress_error', { message: error.message });
+        }                                                                                                                                                                                                    
+        
+        return res.status(500).json({ error: error.message || 'Failed to analyze repository' });
+    } finally {
+        if (localPath && fs.existsSync(localPath)) {
+            try {
+                fs.removeSync(localPath);
+            } catch (cleanupError) {
+                console.error("Failed to clean up repo directory:", cleanupError);
+            }
+        }
+    }
+};
+
+export const chatRepo = async (req, res) => {
+    try {
+        const { repoUrl, question, history = [] } = req.body;
+        if (!repoUrl || !question) {
+            return res.status(400).json({ error: "Missing repoUrl or question" });
+        }
+
+        let repoCode = await getCachedCode(repoUrl);
+        if (!repoCode) {
+            return res.status(404).json({ error: "Repository code not found in cache. Analyze it again." });
+        }
+
+        if (repoCode.length > MAX_CODE_LENGTH) {
+            repoCode = repoCode.substring(0, MAX_CODE_LENGTH) + '\\n...[TRUNCATED]';
+        }
+
+        const answer = await chatWithRepo(repoCode, history, question);
+        res.json({ answer });
+    } catch (error) {
+        console.error("Chat error:", error);
+        res.status(500).json({ error: "Failed to process chat query" });
+    }
+};
+
+export const explainFile = async (req, res) => {
+    try {
+        const { filePath, fileContent } = req.body;
+        if (!filePath || !fileContent) {
+            return res.status(400).json({ error: "Missing filePath or fileContent" });
+        }
+
+        const explanation = await explainFileWithAI(filePath, fileContent);
+        res.json({ explanation });
+    } catch (error) {
+        console.error("Explain file error:", error);
+        res.status(500).json({ error: "Failed to explain file" });
+    }
+};
+
+ FILE: backend/index.js 
+import express from 'express';
+import http from 'http';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import { initSocket } from './sockets/socketService.js';
+import repoRoutes from './routes/repoRoutes.js';
+
+dotenv.config();
+
+const app = express();
+const server = http.createServer(app);
+
+app.use(cors());
+app.use(express.json({ limit: '50mb' }));
+
+// Initialize Socket.io
+initSocket(server);
+
+app.get('/', (req, res) => {
+  res.send('AI Repo Analyzer Backend is Running!');
+});
+
+// Use routes
+app.use('/api/repo', repoRoutes);
+
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
+
+
+ FILE: backend/package.json 
+{
+  "dependencies": {
+    "@google/genai": "^1.47.0",
+    "axios": "^1.13.6",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "fs-extra": "^11.3.4",
+    "simple-git": "^3.33.0",
+    "socket.io": "^4.8.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  },
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "type": "module",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
+
+
+ FILE: backend/routes/repoRoutes.js 
+import express from 'express';
+import { analyzeRepo, chatRepo, explainFile } from '../controllers/repoController.js';
+const router = express.Router();
+
+console.log('repo routes loaded');
+router.post('/analyze', analyzeRepo);
+router.post('/chat', chatRepo);
+router.post('/explain-file', explainFile);
+
+export default router;
+
+ FILE: backend/services/aiServices.js 
+import { GoogleGenAI } from "@google/genai";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+// Initialize Gemini client
+const genAI = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY,
+});
+
+export const analyzeCodeWithAI = async (repoCode) => {
+  console.log("Analyzing code with Gemini...");
+
+  try {
+    const prompt = `
+You are a senior software architect and university project evaluator.
+
+Your task is to perform an EXTREMELY DEEP analysis of the entire repository code and generate a VERY LARGE, DETAILED, STRUCTURED JSON report.
+
+This is NOT a summary. This is a full technical evaluation report.
+
+The response MUST be long, section-wise, and highly descriptive.
+
+Return JSON in EXACTLY this structure:
+
+{
+  "projectOverview": "Write a 25-40 line detailed explanation covering purpose, architecture, user flow, and design decisions.",
+  "complexityLevel": "Beginner | Intermediate | Advanced",
+  "complexityScore": "Give a score like 7.8/10",
+  "techStack": ["List ALL technologies, libraries, frameworks detected"],
+  "architecture": "Write 30+ lines explaining frontend, backend, database schema, authentication flow, API flow, socket flow, and overall system design.",
+  "architectureGraph": {
+    "nodes": [
+      {"id": "frontend", "label": "React Frontend", "group": "frontend"},
+      {"id": "backend", "label": "Express API", "group": "backend"},
+      {"id": "db", "label": "MongoDB", "group": "database"}
+    ],
+    "edges": [
+      {"source": "frontend", "target": "backend", "label": "REST API"},
+      {"source": "backend", "target": "db", "label": "Mongoose"}
+    ]
+  },
+  "keyFeatures": ["Write each feature with 3-5 lines of explanation"],
+  "codeQualityReview": "Write 25+ lines reviewing folder structure, modularity, separation of concerns, naming, patterns, and best practices.",
+  "securityAnalysis": "Write 20+ lines explaining password handling, JWT, OAuth, protected routes, validation, and security practices.",
+  "improvements": ["List real, practical improvements based on the codebase"],
+  "resumeDescription": "Write a strong 4-5 line resume-ready description."
+}
+
+STRICT RULES:
+- DO NOT summarize.
+- DO NOT shorten explanations.
+- Be extremely verbose and technical.
+- Make sure "architectureGraph" accurately outlines Backend modules, Frontend, DB models, Auth, and Sockets based on code. Group can be 'frontend', 'backend', 'database', 'auth', or 'socket'.
+
+Now analyze this repository code deeply:
+
+${repoCode}
+`;
+
+    const response = await genAI.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      generationConfig: {
+      temperature: 0.2,
+      maxOutputTokens: 8192,   
+    },
+    });
+
+    const rawText = response.candidates?.[0]?.content?.parts
+      ?.map((p) => p.text || "")
+      .join("")
+      .trim();
+
+    if (!rawText) {
+      throw new Error("Empty response from Gemini");
+    }
+
+    const cleanJson = rawText
+      .replace(/\`\`\`json/g, "")
+      .replace(/\`\`\`/g, "")
+      .trim();
+
+    try {
+      return JSON.parse(cleanJson);
+    } catch (parseError) {
+      console.error("JSON PARSE ERROR:\\n", cleanJson);
+      throw new Error("Gemini returned invalid JSON format");
+    }
+
+  } catch (error) {
+    console.error("GEMINI ERROR:", error);
+    throw new Error("Failed to analyze code with Gemini");
+  }
+};
+
+export const chatWithRepo = async (repoCode, history, question) => {
+  try {
+    const prompt = `
+You are a senior developer answering questions about a codebase.
+You are given the full repository code.
+Use it to accurately answer the user's question.
+
+REPOSITORY CODE:
+${repoCode}
+
+Conversation History:
+${history.map(h => h.role + ': ' + h.text).join('\\n')}
+
+User Question: ${question}
+Answer in detail:
+`;
+
+    const response = await genAI.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      generationConfig: {
+        temperature: 0.3,
+        maxOutputTokens: 2048,
+      },
+    });
+
+    return response.candidates?.[0]?.content?.parts
+      ?.map((p) => p.text || "")
+      .join("")
+      .trim();
+  } catch (error) {
+    console.error("CHAT ERROR:", error);
+    throw new Error("Failed to chat with AI");
+  }
+};
+
+export const explainFileWithAI = async (filePath, fileContent) => {
+  try {
+    const prompt = `
+You are a senior developer explaining code to a team.
+
+Analyze this file in detail. Cover:
+1. **Purpose**: What this file does and its role in the project
+2. **Key Functions/Components**: List and explain each function, class, or component
+3. **Dependencies**: What it imports and why
+4. **Data Flow**: How data moves through this file
+5. **Patterns**: Design patterns or architectural decisions used
+6. **Potential Issues**: Any bugs, anti-patterns, or improvements
+
+File: ${filePath}
+
+\`\`\`
+${fileContent}
+\`\`\`
+
+Provide a thorough, well-structured explanation.
+`;
+
+    const response = await genAI.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: prompt,
+      generationConfig: {
+        temperature: 0.3,
+        maxOutputTokens: 4096,
+      },
+    });
+
+    return response.candidates?.[0]?.content?.parts
+      ?.map((p) => p.text || "")
+      .join("")
+      .trim();
+  } catch (error) {
+    console.error("EXPLAIN FILE ERROR:", error);
+    throw new Error("Failed to explain file with AI");
+  }
+};
+
+ FILE: backend/sockets/socketService.js 
+import { Server } from 'socket.io';
+
+let io;
+
+export const initSocket = (server) => {
+    io = new Server(server, {
+        cors: {
+            origin: "*",
+            methods: ["GET", "POST"]
+        }
+    });
+
+    io.on('connection', (socket) => {
+        console.log(`Client connected: ${socket.id}`);
+        socket.on('disconnect', () => {
+            console.log(`Client disconnected: ${socket.id}`);
+        });
+    });
+
+    return io;
+};
+
+export const getSocket = () => {
+    if (!io) {
+        throw new Error('Socket.io not initialized!');
+    }
+    return io;
+};
+
+
+ FILE: backend/test-genai.js 
+import { GoogleGenAI } from "@google/genai";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY,
+});
+
+async function main() {
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: "hello",
+    });
+    console.log("Success:", response.text);
+  } catch (err) {
+    console.error("Error:", err);
+  }
+}
+
+main();
+
+
+ FILE: backend/utils/cacheService.js 
+import fs from 'fs-extra';
+import path from 'path';
+import crypto from 'crypto';
+
+const CACHE_DIR = path.join(process.cwd(), 'cache');
+
+export const getCacheKey = (repoUrl) => {
+    return crypto.createHash('md5').update(repoUrl).digest('hex');
+};
+
+export const getCachedResult = async (repoUrl) => {
+    const key = getCacheKey(repoUrl);
+    const cachePath = path.join(CACHE_DIR, `${key}.json`);
+    
+    if (fs.existsSync(cachePath)) {
+        try {
+            const data = await fs.readFile(cachePath, 'utf8');
+            return JSON.parse(data);
+        } catch (err) {
+            console.warn("Could not read cache file", err);
+            return null;
+        }
+    }
+    return null;
+};
+
+export const setCachedResult = async (repoUrl, summary) => {
+    const key = getCacheKey(repoUrl);
+    const cachePath = path.join(CACHE_DIR, `${key}.json`);
+    
+    try {
+        await fs.ensureDir(CACHE_DIR);
+        await fs.writeFile(cachePath, JSON.stringify(summary, null, 2));
+    } catch (err) {
+        console.warn("Could not write cache file", err);
+    }
+};
+
+export const getCachedCode = async (repoUrl) => {
+    const key = getCacheKey(repoUrl);
+    const cachePath = path.join(CACHE_DIR, `${key}_code.txt`);
+    
+    if (fs.existsSync(cachePath)) {
+        try {
+            return await fs.readFile(cachePath, 'utf8');
+        } catch (err) {
+            return null;
+        }
+    }
+    return null;
+};
+
+export const setCachedCode = async (repoUrl, code) => {
+    const key = getCacheKey(repoUrl);
+    const cachePath = path.join(CACHE_DIR, `${key}_code.txt`);
+    
+    try {
+        await fs.ensureDir(CACHE_DIR);
+        await fs.writeFile(cachePath, code);
+    } catch (err) {
+        console.warn("Could not write code cache", err);
+    }
+};
+
+export const getCachedFiles = async (repoUrl) => {
+    const key = getCacheKey(repoUrl);
+    const cachePath = path.join(CACHE_DIR, `${key}_files.json`);
+    
+    if (fs.existsSync(cachePath)) {
+        try {
+            const data = await fs.readFile(cachePath, 'utf8');
+            return JSON.parse(data);
+        } catch (err) {
+            return null;
+        }
+    }
+    return null;
+};
+
+export const setCachedFiles = async (repoUrl, filesDatabase) => {
+    const key = getCacheKey(repoUrl);
+    const cachePath = path.join(CACHE_DIR, `${key}_files.json`);
+    
+    try {
+        await fs.ensureDir(CACHE_DIR);
+        await fs.writeFile(cachePath, JSON.stringify(filesDatabase));
+    } catch (err) {
+        console.warn("Could not write files cache", err);
+    }
+};
+
+
+ FILE: backend/utils/cloneRepo.js 
+import simpleGit from 'simple-git';
+import path from 'path';
+import fs from 'fs-extra'; 
+
+const git = simpleGit();
+
+export const cloneRepo = async (repoUrl) => {
+    const repoName = repoUrl.split('/').pop().replace('.git', '');
+    const clonePath = path.join('temp', repoName);
+
+    if (fs.existsSync(clonePath)) {
+        fs.removeSync(clonePath);
+    }
+
+    try {
+        await git.clone(repoUrl, clonePath, ['--depth', '1']);
+        return clonePath;
+    } catch (error) {
+        throw new Error(`Failed to clone repository: ${error.message}`);
+    }
+};
+
+
+ FILE: backend/utils/readFiles.js 
+import fs from 'fs-extra';
+import path from 'path';
+
+const IGNORED_DIRS = ['.git', 'node_modules', 'dist', 'build', '.next', '.vscode', '.idea'];
+const IGNORED_FILES = ['package-lock.json', 'yarn.lock', 'pnpm-lock.yaml'];
+
+export const readRepoFiles = async (dirPath, currentDepth = 0, context = {
+    totalFiles: 0,
+    languages: {},
+    linesOfCode: 0,
+    maxFolderDepth: 0,
+    largestModule: { name: '', sizeLines: 0 },
+    dependencies: [],
+    fileTree: [],
+    filesDatabase: {},
+    allCode: ''
+}, baseDir = dirPath) => {
+
+    if (currentDepth > context.maxFolderDepth) {
+        context.maxFolderDepth = currentDepth;
+    }
+
+    const files = await fs.readdir(dirPath);
+    let currentTreeLevel = [];
+
+    for (const file of files) {
+        const fullPath = path.join(dirPath, file);
+        const relPath = path.relative(baseDir, fullPath).replace(/\\/g, '/');
+        const stat = await fs.stat(fullPath);
+
+        if (stat.isDirectory()) {
+            if (!IGNORED_DIRS.includes(file)) {
+                context.totalFolders = (context.totalFolders || 0) + 1;
+                const children = await readRepoFiles(fullPath, currentDepth + 1, context, baseDir);
+                currentTreeLevel.push({
+                    name: file,
+                    path: relPath,
+                    isDir: true,
+                    children
+                });
+            }
+        } else {
+            const ext = path.extname(file).toLowerCase();
+            const validCodeFile = (
+                file.endsWith('.js') || file.endsWith('.jsx') ||
+                file.endsWith('.ts') || file.endsWith('.tsx') ||
+                file.endsWith('.py') || file.endsWith('.java') ||
+                file.endsWith('.cpp') || file.endsWith('.go') ||
+                file.endsWith('.rs') || file.endsWith('.md') || 
+                file.endsWith('.html') || file.endsWith('.css') ||
+                (file.endsWith('.json') && !IGNORED_FILES.includes(file))
+            );
+
+            if (validCodeFile) {
+                try {
+                    context.totalFiles += 1;
+                    
+                    const content = fs.readFileSync(fullPath, 'utf-8');
+                    const lines = content.split('\n').length;
+                    context.linesOfCode += lines;
+                    
+                    if (lines > context.largestModule.sizeLines) {
+                        context.largestModule = { name: file, sizeLines: lines };
+                    }
+                    
+                    if (ext) {
+                        const nameLower = ext.replace('.', '');
+                        context.languages[nameLower] = (context.languages[nameLower] || 0) + 1;
+                    }
+
+                    if (file === 'package.json') {
+                        try {
+                           const pkg = JSON.parse(content);
+                           const deps = Object.keys(pkg.dependencies || {});
+                           const devDeps = Object.keys(pkg.devDependencies || {});
+                           context.dependencies = [...new Set([...context.dependencies, ...deps, ...devDeps])];
+                        } catch(e){}
+                    }
+                    
+                    context.allCode += `\n\n FILE: ${relPath} \n`;
+                    context.allCode += content;
+                    
+                    context.filesDatabase[relPath] = content;
+
+                    currentTreeLevel.push({
+                        name: file,
+                        path: relPath,
+                        isDir: false,
+                        size: lines
+                    });
+                } catch (err) {
+                    console.warn(`Could not read file ${fullPath}`);
+                }
+            }
+        }
+    }
+
+    if (currentDepth === 0) {
+        let mainLanguage = 'Unknown';
+        let maxCount = 0;
+        for (const [lang, count] of Object.entries(context.languages)) {
+            if (count > maxCount) {
+                maxCount = count;
+                mainLanguage = lang;
+            }
+        }
+        
+        const langMap = {
+            'js': 'JavaScript', 'jsx': 'React (JSX)', 'ts': 'TypeScript', 'tsx': 'React (TSX)',
+            'py': 'Python', 'java': 'Java', 'cpp': 'C++', 'go': 'Go', 'rs': 'Rust', 'html': 'HTML', 'css': 'CSS'
+        };
+
+        return {
+            allCode: context.allCode,
+            fileTree: currentTreeLevel,
+            filesDatabase: context.filesDatabase,
+            metrics: {
+                totalFiles: context.totalFiles,
+                totalFolders: context.totalFolders || 0,
+                linesOfCode: context.linesOfCode,
+                maxFolderDepth: context.maxFolderDepth,
+                largestModule: context.largestModule,
+                mainLanguage: langMap[mainLanguage] || mainLanguage.toUpperCase(),
+                languages: context.languages,
+                dependencies: context.dependencies.slice(0, 30)
+            }
+        };
+    }
+    
+    return currentTreeLevel;
+};
+
+ FILE: frontend/README.md 
+# React + Vite
+
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+
+Currently, two official plugins are available:
+
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+
+## React Compiler
+
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+
+ FILE: frontend/eslint.config.js 
+import js from '@eslint/js'
+import globals from 'globals'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+import { defineConfig, globalIgnores } from 'eslint/config'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{js,jsx}'],
+    extends: [
+      js.configs.recommended,
+      reactHooks.configs.flat.recommended,
+      reactRefresh.configs.vite,
+    ],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+      parserOptions: {
+        ecmaVersion: 'latest',
+        ecmaFeatures: { jsx: true },
+        sourceType: 'module',
+      },
+    },
+    rules: {
+      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+    },
+  },
+])
+
+
+ FILE: frontend/index.html 
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CODEBASE ANALYZER</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
+
+
+ FILE: frontend/package.json 
+{
+  "name": "frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.2.1",
+    "@xyflow/react": "^12.10.2",
+    "axios": "^1.13.6",
+    "d3": "^7.9.0",
+    "framer-motion": "^12.37.0",
+    "jspdf": "^4.2.1",
+    "lucide-react": "^0.577.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-router-dom": "^7.13.1",
+    "socket.io-client": "^4.8.3",
+    "tailwindcss": "^4.2.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.4",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.0",
+    "eslint": "^9.39.4",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.4.0",
+    "vite": "^8.0.0"
+  }
+}
+
+
+ FILE: frontend/src/App.css 
+.counter {
+  font-size: 16px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 2px solid transparent;
+  transition: border-color 0.3s;
+  margin-bottom: 24px;
+
+  &:hover {
+    border-color: var(--accent-border);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+.hero {
+  position: relative;
+
+  .base,
+  .framework,
+  .vite {
+    inset-inline: 0;
+    margin: 0 auto;
+  }
+
+  .base {
+    width: 170px;
+    position: relative;
+    z-index: 0;
+  }
+
+  .framework,
+  .vite {
+    position: absolute;
+  }
+
+  .framework {
+    z-index: 1;
+    top: 34px;
+    height: 28px;
+    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
+      scale(1.4);
+  }
+
+  .vite {
+    z-index: 0;
+    top: 107px;
+    height: 26px;
+    width: auto;
+    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
+      scale(0.8);
+  }
+}
+
+#center {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  place-content: center;
+  place-items: center;
+  flex-grow: 1;
+
+  @media (max-width: 1024px) {
+    padding: 32px 20px 24px;
+    gap: 18px;
+  }
+}
+
+#next-steps {
+  display: flex;
+  border-top: 1px solid var(--border);
+  text-align: left;
+
+  & > div {
+    flex: 1 1 0;
+    padding: 32px;
+    @media (max-width: 1024px) {
+      padding: 24px 20px;
+    }
+  }
+
+  .icon {
+    margin-bottom: 16px;
+    width: 22px;
+    height: 22px;
+  }
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+#docs {
+  border-right: 1px solid var(--border);
+
+  @media (max-width: 1024px) {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+#next-steps ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 8px;
+  margin: 32px 0 0;
+
+  .logo {
+    height: 18px;
+  }
+
+  a {
+    color: var(--text-h);
+    font-size: 16px;
+    border-radius: 6px;
+    background: var(--social-bg);
+    display: flex;
+    padding: 6px 12px;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: box-shadow 0.3s;
+
+    &:hover {
+      box-shadow: var(--shadow);
+    }
+    .button-icon {
+      height: 18px;
+      width: 18px;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    li {
+      flex: 1 1 calc(50% - 8px);
+    }
+
+    a {
+      width: 100%;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+  }
+}
+
+#spacer {
+  height: 88px;
+  border-top: 1px solid var(--border);
+  @media (max-width: 1024px) {
+    height: 48px;
+  }
+}
+
+.ticks {
+  position: relative;
+  width: 100%;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: -4.5px;
+    border: 5px solid transparent;
+  }
+
+  &::before {
+    left: 0;
+    border-left-color: var(--border);
+  }
+  &::after {
+    right: 0;
+    border-right-color: var(--border);
+  }
+}
+
+
+ FILE: frontend/src/App.jsx 
+import { Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import Result from './pages/Result';
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/result" element={<Result />} />
+      <Route path="*" element={<Home />} />
+    </Routes>
+  );
+}
+
+export default App;
+
+
+ FILE: frontend/src/components/ArchGraph.jsx 
+import React, { useMemo } from 'react';
+import { ReactFlow, Controls, Background, MarkerType } from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
+
+export default function ArchGraph({ data }) {
+  const nodes = useMemo(() => {
+    if (!data?.nodes) return [];
+    
+    const colors = {
+      frontend: '#10b981', // emerald-500
+      backend: '#3b82f6',  // blue-500
+      database: '#f59e0b', // amber-500
+      auth: '#ef4444',     // red-500
+      socket: '#8b5cf6',   // violet-500
+      default: '#64748b'   // slate-500
+    };
+
+    return data.nodes.map((node, i) => {
+      // Basic layout engine (since we are not using dagre for simplicity, we'll try a nice circular/grid layout)
+      const ringMap = { frontend: 0, backend: 1, auth: 1, socket: 1, database: 2 };
+      const level = ringMap[node.group] ?? 1;
+      
+      const idxInLevel = data.nodes.filter(n => (ringMap[n.group]??1) === level).findIndex(n => n.id === node.id);
+      const itemsInLevel = Math.max(1, data.nodes.filter(n => (ringMap[n.group]??1) === level).length);
+      
+      const width = 600;
+      const xOffset = width / (itemsInLevel + 1);
+      
+      return {
+        id: node.id,
+        position: { x: xOffset * (idxInLevel + 1) - 50, y: level * 150 + 50 },
+        data: { label: node.label },
+        style: {
+          background: colors[node.group] || colors.default,
+          color: 'white',
+          border: 'none',
+          borderRadius: '8px',
+          padding: '10px',
+          fontWeight: 'bold',
+          width: 150,
+          textAlign: 'center',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)'
+        }
+      };
+    });
+  }, [data]);
+
+  const edges = useMemo(() => {
+    if (!data?.edges) return [];
+    return data.edges.map((edge, i) => ({
+      id: `e-${edge.source}-${edge.target}-${i}`,
+      source: edge.source,
+      target: edge.target,
+      label: edge.label,
+      animated: true,
+      style: { stroke: '#94a3b8', strokeWidth: 2 },
+      labelStyle: { fill: '#cbd5e1', fontWeight: 500 },
+      labelBgStyle: { fill: '#1e293b' },
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        color: '#94a3b8',
+      },
+    }));
+  }, [data]);
+
+  if (!data?.nodes || data.nodes.length === 0) {
+    return <div className="text-slate-400 p-8 text-center italic">Detailed Architecture Graph not available for this repository.</div>;
+  }
+
+  return (
+    <div style={{ height: 400, width: '100%', borderRadius: '16px', overflow: 'hidden' }}>
+      <ReactFlow 
+        nodes={nodes} 
+        edges={edges} 
+        fitView 
+        attributionPosition="bottom-right"
+        proOptions={{ hideAttribution: true }}
+      >
+        <Background color="#334155" gap={20} size={1} />
+        <Controls showInteractive={false} className="bg-slate-800 text-white fill-white border-slate-700" />
+      </ReactFlow>
+    </div>
+  );
+}
+
+
+ FILE: frontend/src/components/ChatBox.jsx 
+import { useState, useRef, useEffect } from 'react';
+import { Send, Loader2, MessageSquare, User, Bot } from 'lucide-react';
+import { chatWithRepository } from '../services/apiService';
+import { motion } from 'framer-motion';
+
+export default function ChatBox({ repoUrl }) {
+  const [messages, setMessages] = useState([
+    { role: 'assistant', text: 'Hi! I have analyzed the repository. What would you like to know?' }
+  ]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const handleSend = async (e) => {
+    e.preventDefault();
+    if (!input.trim() || isLoading) return;
+
+    const userMessage = input;
+    setInput('');
+    setMessages(prev => [...prev, { role: 'user', text: userMessage }]);
+    setIsLoading(true);
+
+    try {
+      const history = messages.filter(m => m.role !== 'system');
+      const response = await chatWithRepository(repoUrl, userMessage, history);
+      setMessages(prev => [...prev, { role: 'assistant', text: response.answer }]);
+    } catch (error) {
+      setMessages(prev => [...prev, { role: 'assistant', text: 'Sorry, I encountered an error: ' + error }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-full min-h-[400px] bg-slate-900/50 border border-slate-700/50 rounded-2xl glass-card overflow-hidden">
+      <div className="p-4 bg-slate-800/80 border-b border-slate-700 flex items-center gap-3">
+        <MessageSquare className="w-5 h-5 text-emerald-400" />
+        <h3 className="font-semibold text-white">Ask Questions About Repo</h3>
+      </div>
+      
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.map((msg, idx) => (
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            key={idx} 
+            className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+          >
+            {msg.role === 'assistant' && (
+              <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                <Bot className="w-5 h-5" />
+              </div>
+            )}
+            
+            <div className={`p-3 rounded-2xl max-w-[80%] ${
+              msg.role === 'user' ? 'bg-emerald-600/90 text-white rounded-tr-sm' : 'bg-slate-800 text-slate-200 rounded-tl-sm'
+            }`}>
+              <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.text}</p>
+            </div>
+            
+            {msg.role === 'user' && (
+              <div className="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center shrink-0">
+                <User className="w-5 h-5 text-slate-300" />
+              </div>
+            )}
+          </motion.div>
+        ))}
+        {isLoading && (
+          <div className="flex items-center gap-2 text-slate-400 text-sm p-2">
+            <Loader2 className="w-4 h-4 animate-spin text-emerald-500" /> AI is thinking...
+          </div>
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      <form onSubmit={handleSend} className="p-4 bg-slate-800/50 border-t border-slate-700 flex gap-2">
+        <input 
+          type="text" 
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Ask anything about this repo..."
+          className="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
+        />
+        <button 
+          type="submit" 
+          disabled={isLoading || !input.trim()}
+          className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white rounded-xl px-4 py-2.5 transition-colors flex items-center justify-center"
+        >
+          <Send className="w-4 h-4" />
+        </button>
+      </form>
+    </div>
+  );
+}
+
+
+ FILE: frontend/src/components/FileTree.jsx 
+import { useState } from 'react';
+import { ChevronRight, Folder, FolderOpen, FileText, FileCode2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const EXT_COLORS = {
+  js: 'text-yellow-400', jsx: 'text-cyan-400', ts: 'text-blue-400', tsx: 'text-blue-400',
+  py: 'text-green-400', java: 'text-red-400', go: 'text-sky-400', rs: 'text-orange-400',
+  css: 'text-purple-400', html: 'text-rose-400', json: 'text-amber-400', md: 'text-slate-400',
+  cpp: 'text-pink-400',
+};
+
+function getFileColor(name) {
+  const ext = name.split('.').pop()?.toLowerCase();
+  return EXT_COLORS[ext] || 'text-slate-400';
+}
+
+function TreeNode({ node, depth = 0, onFileClick, selectedFile }) {
+  const [isOpen, setIsOpen] = useState(depth < 1);
+
+  if (node.isDir) {
+    return (
+      <div>
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="w-full flex items-center gap-1.5 py-1 px-2 text-sm rounded-lg hover:bg-slate-800/60 transition-colors group"
+          style={{ paddingLeft: `${depth * 16 + 8}px` }}
+        >
+          <ChevronRight
+            className={`w-3 h-3 text-slate-500 transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-90' : ''}`}
+          />
+          {isOpen ? (
+            <FolderOpen className="w-4 h-4 text-emerald-400 shrink-0" />
+          ) : (
+            <Folder className="w-4 h-4 text-emerald-500/70 shrink-0" />
+          )}
+          <span className="text-slate-300 truncate font-medium group-hover:text-white transition-colors">
+            {node.name}
+          </span>
+        </button>
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.15 }}
+              className="overflow-hidden relative"
+            >
+              {/* Tree guide line */}
+              <div 
+                className="absolute top-0 bottom-0 w-px bg-slate-700/50"
+                style={{ left: `${depth * 16 + 15}px` }}
+              />
+              <div className="relative z-10">
+                {node.children
+                  ?.sort((a, b) => (b.isDir ? 1 : 0) - (a.isDir ? 1 : 0) || a.name.localeCompare(b.name))
+                  .map((child) => (
+                    <TreeNode
+                      key={child.path}
+                      node={child}
+                      depth={depth + 1}
+                      onFileClick={onFileClick}
+                      selectedFile={selectedFile}
+                    />
+                  ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  }
+
+  const isSelected = selectedFile?.path === node.path;
+  const colorClass = getFileColor(node.name);
+
+  return (
+    <button
+      onClick={() => onFileClick(node)}
+      className={`w-full flex items-center gap-1.5 py-1 px-2 text-sm rounded-lg transition-all group ${
+        isSelected
+          ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/20'
+          : 'hover:bg-slate-800/60 text-slate-400 border border-transparent'
+      }`}
+      style={{ paddingLeft: `${depth * 16 + 8}px` }}
+    >
+      <span className="w-3 h-3 shrink-0" />
+      <FileCode2 className={`w-4 h-4 shrink-0 ${isSelected ? 'text-emerald-400' : colorClass}`} />
+      <span className={`truncate ${isSelected ? 'text-emerald-200 font-medium' : 'group-hover:text-slate-200'}`}>
+        {node.name}
+      </span>
+      <span className="ml-auto text-[10px] text-slate-600 shrink-0">{node.size}L</span>
+    </button>
+  );
+}
+
+export default function FileTree({ tree, onFileClick, selectedFile }) {
+  if (!tree || tree.length === 0) {
+    return (
+      <div className="p-4 text-sm text-slate-500 italic text-center">
+        No files detected
+      </div>
+    );
+  }
+
+  const sorted = [...tree].sort((a, b) => (b.isDir ? 1 : 0) - (a.isDir ? 1 : 0) || a.name.localeCompare(b.name));
+
+  return (
+    <div className="space-y-0.5 py-1">
+      {sorted.map((node) => (
+        <TreeNode
+          key={node.path}
+          node={node}
+          depth={0}
+          onFileClick={onFileClick}
+          selectedFile={selectedFile}
+        />
+      ))}
+    </div>
+  );
+}
+
+
+ FILE: frontend/src/index.css 
+@import "tailwindcss";
+
+/* ===== THEME TOKENS (Tailwind v4) ===== */
+@theme {
+  /* Primary Green (AI Theme) */
+  --color-primary-500: #10b981;   /* emerald-500 */
+  --color-primary-400: #34d399;
+  --color-primary-300: #6ee7b7;
+
+  /* Dark Background Scale */
+  --color-dark-950: #04110d;
+  --color-dark-900: #061a14;
+  --color-dark-800: #0b2a21;
+  --color-dark-700: #12352a;
+
+  /* Light Text */
+  --color-light-100: #ecfdf5;
+}
+
+/* ===== GLOBAL BODY ===== */
+body {
+  background: radial-gradient(circle at top left, #0b2a21, #04110d 60%);
+  color: var(--color-light-100);
+  font-family: 'Inter', system-ui, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== GLASS CARD STYLE ===== */
+.glass-card {
+  background: rgba(16, 185, 129, 0.06);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(16, 185, 129, 0.18);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+}
+
+/* ===== SCROLLBAR (THEMED) ===== */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #04110d;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #065f46;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #10b981;
+}
+
+/* ===== SELECTION COLOR ===== */
+::selection {
+  background: #10b981;
+  color: #04110d;
+}
+
+ FILE: frontend/src/main.jsx 
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
+import App from './App.jsx'
+import './index.css'
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <BrowserRouter>
+     <div className="min-h-screen bg-gradient-to-br from-emerald-950 via-green-900 to-black text-white">
+      <App />
+     </div>
+    </BrowserRouter>
+  </React.StrictMode>,
+)
+
+
+ FILE: frontend/src/pages/Dashboard.jsx 
+import { useState, useRef, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Search, Loader2, Target, Layers, Code2, FileText, Database, FolderTree, TerminalSquare, MessageSquare, Download, AlertCircle, PlayCircle, Code, FileCode2, Stars, CheckCircle2, ChevronRight, User, Bot } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import jsPDF from 'jspdf';
+import ArchGraph from '../components/ArchGraph';
+import { analyzeRepository, chatWithRepository } from '../services/apiService';
+import { initiateSocketConnection, getSocket, disconnectSocket } from '../services/socketService';
+
+export default function Dashboard() {
+  const [repoUrl, setRepoUrl] = useState('');
+  const [chatInput, setChatInput] = useState('');
+  const [activeTab, setActiveTab] = useState('overview');
+  
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [progressStep, setProgressStep] = useState(null);
+  const [error, setError] = useState(null);
+  
+  const [summary, setSummary] = useState(null);
+  const [analyzedRepoUrl, setAnalyzedRepoUrl] = useState('');
+  
+  const [chatMessages, setChatMessages] = useState([
+    { role: 'assistant', text: 'Hi! Analyze a repository first, then ask me anything about it.' }
+  ]);
+  const [isChatLoading, setIsChatLoading] = useState(false);
+  const chatEndRef = useRef(null);
+
+  useEffect(() => {
+    return () => disconnectSocket();
+  }, []);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages]);
+
+  const handleAnalyze = async (e) => {
+    e?.preventDefault();
+    if (!repoUrl) return;
+
+    setIsAnalyzing(true);
+    setError(null);
+    setProgressStep('cloning_started');
+    setSummary(null);
+
+    try {
+      initiateSocketConnection();
+      const socket = getSocket();
+
+      socket.on('progress', (data) => {
+        setProgressStep(data.step);
+      });
+
+      socket.on('progress_error', (data) => {
+        setError(data.message);
+        setIsAnalyzing(false);
+        disconnectSocket();
+      });
+
+      socket.on('connect', async () => {
+        try {
+          const res = await analyzeRepository(repoUrl, socket.id);
+          setSummary(res.summary);
+          setAnalyzedRepoUrl(repoUrl);
+          setChatMessages([{ role: 'assistant', text: `Repository loaded! I've read the source code of ${repoUrl}. What would you like to know?` }]);
+        } catch (err) {
+          setError(err.message || err.toString());
+        } finally {
+          setIsAnalyzing(false);
+          disconnectSocket();
+        }
+      });
+    } catch {
+      setError('Failed to connect to server');
+      setIsAnalyzing(false);
+    }
+  };
+
+  const handleAskAI = async (e) => {
+    e?.preventDefault();
+    if (!chatInput.trim() || isChatLoading || !analyzedRepoUrl) return;
+
+    const userMessage = chatInput;
+    setChatInput('');
+    setChatMessages(prev => [...prev, { role: 'user', text: userMessage }]);
+    setIsChatLoading(true);
+
+    try {
+      const history = chatMessages.filter(m => m.role !== 'system');
+      const response = await chatWithRepository(analyzedRepoUrl, userMessage, history);
+      setChatMessages(prev => [...prev, { role: 'assistant', text: response.answer }]);
+    } catch (err) {
+      setChatMessages(prev => [...prev, { role: 'assistant', text: 'Error: ' + err.message }]);
+    } finally {
+      setIsChatLoading(false);
+    }
+  };
+
+  const downloadPDF = () => {
+    if (!summary) return;
+    const doc = new jsPDF();
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.setTextColor(16, 185, 129);
+    doc.text("Repository Analysis Report", 20, 20);
+    doc.setFontSize(16);
+    doc.setTextColor(0, 0, 0);
+    doc.text("Complexity: " + (summary.complexityScore || summary.complexityLevel || 'N/A'), 20, 30);
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    
+    let y = 40;
+    const addSection = (title, content) => {
+        if (!content) return;
+        if (y > 270) { doc.addPage(); y = 20; }
+        doc.setFont("helvetica", "bold");
+        doc.text(title, 20, y);
+        y += 8;
+        doc.setFont("helvetica", "normal");
+        let textLines = doc.splitTextToSize(String(content), 170);
+        for(let line of textLines) {
+           if (y > 280) { doc.addPage(); y = 20; }
+           doc.text(line, 20, y);
+           y += 7;
+        }
+        y += 10;
+    };
+
+    addSection("Project Overview", summary.projectOverview || summary.summary);
+    addSection("Architecture", summary.architecture);
+    addSection("Key Features", summary.keyFeatures?.join('\\n- '));
+    addSection("Code Quality Review", summary.codeQualityReview);
+    addSection("Security Analysis", summary.securityAnalysis);
+    addSection("Tech Stack", summary.techStack?.join(', '));
+    addSection("Improvements", summary.improvements?.join('\\n- '));
+    addSection("Resume Description", summary.resumeDescription);
+
+    doc.save('repo-analysis.pdf');
+  };
+
+  const tabs = [
+    { id: 'overview', label: 'Overview', icon: Target },
+    { id: 'architecture', label: 'Architecture', icon: Layers },
+    { id: 'techstack', label: 'Tech Stack', icon: Code2 },
+    { id: 'metrics', label: 'Metrics', icon: Database },
+    { id: 'insights', label: 'Insights', icon: TerminalSquare },
+  ];
+
+  return (
+    <div className="flex flex-col h-screen bg-slate-950 text-slate-200 overflow-hidden font-sans selection:bg-emerald-500/30">
+      
+      {/* Background ambient light */}
+      <div className="absolute top-0 left-[20%] w-[600px] h-[300px] bg-emerald-600/10 blur-[120px] rounded-full pointer-events-none" />
+
+      {/* --- FIXED TOP BAR --- */}
+      <header className="h-16 shrink-0 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md flex items-center justify-between px-4 z-20">
+        
+        {/* Brand */}
+        <div className="flex items-center gap-3 w-64">
+           <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+              <Code className="w-4 h-4 text-white"/>
+           </div>
+           <h1 className="font-bold text-white tracking-tight hidden sm:block">AI Analyzer</h1>
+        </div>
+
+        {/* Action Center - Repo URL | Ask AI | Analyze */}
+        <div className="flex-1 max-w-4xl flex items-center gap-3 mx-4">
+          
+          <form className="flex-1 flex gap-2 relative" onSubmit={handleAnalyze}>
+             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+             <input 
+               type="text" 
+               placeholder="GitHub Repo URL..." 
+               value={repoUrl}
+               onChange={(e) => setRepoUrl(e.target.value)}
+               className="w-full bg-slate-950/50 border border-slate-700/80 rounded-lg py-1.5 pl-9 pr-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500/50 transition-colors"
+             />
+          </form>
+
+          <form className="flex-1 flex gap-2 relative" onSubmit={handleAskAI}>
+             <MessageSquare className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+             <input 
+               type="text" 
+               placeholder="Ask AI anything about this repo..." 
+               value={chatInput}
+               onChange={(e) => setChatInput(e.target.value)}
+               disabled={!summary}
+               className="w-full bg-slate-950/50 border border-slate-700/80 rounded-lg py-1.5 pl-9 pr-3 text-sm text-slate-200 focus:outline-none focus:border-emerald-500/50 transition-colors disabled:opacity-50"
+             />
+          </form>
+
+          <button 
+             onClick={handleAnalyze}
+             disabled={!repoUrl || isAnalyzing}
+             className="px-4 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-all shadow-md shadow-emerald-500/20 flex items-center gap-2 whitespace-nowrap"
+          >
+            {isAnalyzing ? <Loader2 className="w-4 h-4 animate-spin"/> : <PlayCircle className="w-4 h-4"/>} 
+            Analyze
+          </button>
+        </div>
+        
+        {/* Top right actions */}
+        <div className="w-48 flex justify-end">
+          <button 
+             onClick={downloadPDF}
+             disabled={!summary}
+             className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-emerald-400 text-sm rounded-lg flex items-center gap-2 border border-slate-700 transition-colors"
+          >
+            <Download className="w-4 h-4" /> PDF Report
+          </button>
+        </div>
+      </header>
+
+      {/* --- DASHBOARD LAYOUT --- */}
+      <div className="flex-1 flex overflow-hidden">
+        
+        {/* --- LEFT SIDEBAR --- */}
+        <aside className="w-64 border-r border-slate-800 bg-slate-900/30 flex flex-col pt-6 z-10 shrink-0">
+          <div className="px-4 mb-4 text-xs font-semibold text-slate-500 uppercase tracking-widest">Navigation</div>
+          <nav className="flex-1 space-y-1 px-2 flex flex-col">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                  activeTab === tab.id 
+                    ? 'bg-emerald-500/10 text-emerald-400 shadow-sm border border-emerald-500/20' 
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 border border-transparent'
+                }`}
+              >
+                <tab.icon className="w-4 h-4" />
+                {tab.label}
+              </button>
+            ))}
+            
+            <div className="mt-4 pt-4 border-t border-slate-800/50">
+               <button
+                  onClick={downloadPDF}
+                  disabled={!summary}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                    !summary 
+                      ? 'text-slate-500 opacity-50 cursor-not-allowed'
+                      : 'text-emerald-400 hover:bg-emerald-500/10 border border-emerald-500/20'
+                  }`}
+                >
+                  <Download className="w-4 h-4" />
+                  PDF Report
+               </button>
+            </div>
+          </nav>
+          
+          {summary && (
+             <div className="p-4 mt-auto">
+               <div className="bg-slate-900 border border-slate-700/80 rounded-xl p-4 text-center shadow-inner relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-2 opacity-10"><Stars className="w-12 h-12 text-emerald-500"/></div>
+                  <div className="text-xs text-slate-400 uppercase tracking-wide mb-1">Score</div>
+                  <div className="text-2xl font-black text-emerald-400">{summary.complexityScore || summary.complexityLevel}</div>
+               </div>
+             </div>
+          )}
+        </aside>
+
+        {/* --- MAIN CONTENT AREA --- */}
+        <main className="flex-1 overflow-y-auto relative bg-slate-950 p-8 scroll-smooth">
+          
+          {error && (
+            <div className="mb-6 bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl flex items-center gap-3">
+              <AlertCircle className="w-5 h-5"/>
+              <p>{error}</p>
+            </div>
+          )}
+
+          {isAnalyzing && (
+            <div className="flex flex-col items-center justify-center py-20">
+               <div className="bg-slate-900/60 border border-emerald-500/30 rounded-2xl p-8 backdrop-blur-md shadow-[0_0_30px_rgba(16,185,129,0.1)] w-full max-w-lg">
+                 <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                    <Loader2 className="w-5 h-5 animate-spin text-emerald-500" />
+                    Analyzing Repository
+                 </h3>
+                 <div className="space-y-6">
+                    {['cloning_started', 'reading_files', 'analyzing_code', 'analysis_completed'].map((step, idx) => {
+                      const stages = ['cloning_started', 'reading_files', 'analyzing_code', 'analysis_completed'];
+                      const currIdx = stages.indexOf(progressStep);
+                      const isCompleted = currIdx > idx;
+                      const isActive = currIdx === idx;
+                      return (
+                         <div key={step} className="flex items-center gap-4">
+                           <div className={`w-5 h-5 rounded-full flex items-center justify-center ${isCompleted ? 'bg-emerald-500 text-white' : isActive ? 'bg-emerald-500/20 border border-emerald-400' : 'bg-slate-800'}`}>
+                              {isCompleted && <CheckCircle2 className="w-3 h-3"/>}
+                              {isActive && <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />}
+                           </div>
+                           <span className={isActive ? 'text-white font-medium' : isCompleted ? 'text-slate-400' : 'text-slate-600'}>
+                             {step.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                           </span>
+                         </div>
+                      )
+                    })}
+                 </div>
+               </div>
+            </div>
+          )}
+
+          {!summary && !isAnalyzing && (
+            <div className="flex flex-col items-center justify-center h-full opacity-60">
+              <Stars className="w-20 h-20 text-slate-700 mb-6" />
+              <h2 className="text-2xl font-bold text-slate-400 mb-2">No Analysis Selected</h2>
+              <p className="text-slate-500">Enter a GitHub matching URL in the top bar and click Analyze.</p>
+            </div>
+          )}
+
+          {summary && !isAnalyzing && (
+            <div className="max-w-4xl mx-auto pb-10">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeTab}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  
+                  {/* OVERVIEW */}
+                  {activeTab === 'overview' && (
+                    <div className="space-y-6">
+                      <h2 className="text-3xl font-bold flex items-center gap-3"><Target className="text-emerald-400 w-8 h-8"/> Project Overview</h2>
+                      <div className="glass-card rounded-2xl p-6 leading-relaxed text-slate-300 text-lg border border-slate-700/50">
+                        {summary.projectOverview || summary.summary}
+                      </div>
+
+                      <h3 className="text-xl font-bold mt-10 mb-4 text-white">Code Quality Review</h3>
+                      <div className="glass-card rounded-2xl p-6 text-slate-300 border border-slate-700/50 leading-relaxed whitespace-pre-wrap">
+                        {summary.codeQualityReview}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ARCHITECTURE */}
+                  {activeTab === 'architecture' && (
+                    <div className="space-y-6">
+                      <h2 className="text-3xl font-bold flex items-center gap-3"><Layers className="text-emerald-400 w-8 h-8"/> Architecture</h2>
+                      
+                      <div className="bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden shadow-inner h-[500px]">
+                        <ArchGraph data={summary.architectureGraph} />
+                      </div>
+
+                      <div className="glass-card rounded-2xl p-6 text-slate-300 text-base leading-relaxed border border-slate-700/50 whitespace-pre-wrap">
+                        {summary.architecture}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* TECH STACK */}
+                  {activeTab === 'techstack' && (
+                    <div className="space-y-6">
+                      <h2 className="text-3xl font-bold flex items-center gap-3"><Code2 className="text-emerald-400 w-8 h-8"/> Tech Stack</h2>
+                      <div className="flex flex-wrap gap-3 p-6 glass-card rounded-2xl border border-slate-700/50">
+                        {summary.techStack?.map((tech, i) => (
+                           <span key={i} className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl font-medium text-emerald-300 shadow-sm">
+                             {tech}
+                           </span>
+                        ))}
+                      </div>
+
+                      <h3 className="text-xl font-bold mt-10 mb-4 text-white">Security Analysis</h3>
+                      <div className="glass-card rounded-2xl p-6 text-slate-300 border border-slate-700/50 leading-relaxed whitespace-pre-wrap">
+                        {summary.securityAnalysis}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* METRICS */}
+                  {activeTab === 'metrics' && (
+                    <div className="space-y-6">
+                      <h2 className="text-3xl font-bold flex items-center gap-3"><Database className="text-emerald-400 w-8 h-8"/> Metrics</h2>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {[
+                          { l: 'Total Files', v: summary.metrics?.totalFiles, i: FileText, c: 'text-blue-400' },
+                          { l: 'Lines of Code', v: summary.metrics?.linesOfCode?.toLocaleString(), i: Code, c: 'text-emerald-400' },
+                          { l: 'Languages', v: summary.metrics?.languages?.length || 0, i: Database, c: 'text-purple-400' },
+                          { l: 'Max Depth', v: summary.metrics?.maxFolderDepth, i: FolderTree, c: 'text-amber-400' },
+                        ].map(metric => (
+                           <div key={metric.l} className="glass-card rounded-2xl p-6 border border-slate-700/50 flex flex-col items-center justify-center text-center">
+                             <metric.i className={`w-8 h-8 mb-3 ${metric.c}`}/>
+                             <span className="text-3xl font-bold text-white mb-1">{metric.v}</span>
+                             <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest">{metric.l}</span>
+                           </div>
+                        ))}
+                      </div>
+                      
+                      <div className="glass-card rounded-2xl p-6 border border-slate-700/50 flex items-center gap-6 mt-6">
+                         <div className="p-4 bg-rose-500/10 rounded-xl text-rose-400"><FileCode2 className="w-8 h-8"/></div>
+                         <div>
+                            <div className="text-sm font-semibold text-slate-400 uppercase tracking-widest mb-1">Largest Module</div>
+                            <div className="text-xl font-bold text-white">{summary.metrics?.largestModule?.name || '-'}</div>
+                         </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* INSIGHTS */}
+                  {activeTab === 'insights' && (
+                    <div className="space-y-6">
+                      <h2 className="text-3xl font-bold flex items-center gap-3"><TerminalSquare className="text-emerald-400 w-8 h-8"/> Insights & Features</h2>
+                      
+                      <div className="glass-card rounded-2xl p-8 border border-slate-700/50 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-emerald-600/5 opacity-50"/>
+                        <h3 className="text-lg font-bold text-emerald-400 mb-4 relative z-10 flex items-center gap-2">Resume Description <TerminalSquare className="w-4 h-4"/></h3>
+                        <p className="text-xl font-medium italic leading-relaxed text-slate-200 relative z-10 mb-4">"{summary.resumeDescription}"</p>
+                        <button onClick={() => navigator.clipboard.writeText(summary.resumeDescription)} className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-sm font-medium rounded-lg transition-colors border border-slate-600 relative z-10 flex items-center gap-2 w-max">
+                           Copy Text
+                        </button>
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-6 mt-6">
+                        <div className="glass-card rounded-2xl p-6 border border-slate-700/50">
+                           <h3 className="text-lg font-bold text-white mb-4">Key Features</h3>
+                           <ul className="space-y-3">
+                             {summary.keyFeatures?.map((f, i) => (
+                                <li key={i} className="flex gap-3 text-slate-300 text-sm">
+                                  <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-500 mt-0.5"/> <span>{f}</span>
+                                </li>
+                             ))}
+                           </ul>
+                        </div>
+                        <div className="glass-card rounded-2xl p-6 border border-slate-700/50 flex flex-col">
+                           <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">Suggested Improvements</h3>
+                           <ul className="space-y-3 flex-1">
+                             {summary.improvements?.map((f, i) => (
+                                <li key={i} className="flex gap-3 text-slate-300 text-sm">
+                                  <ChevronRight className="w-5 h-5 shrink-0 text-amber-500 mt-0.5"/> <span>{f}</span>
+                                </li>
+                             ))}
+                           </ul>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          )}
+        </main>
+
+        {/* --- RIGHT CHATBOT SIDEBAR --- */}
+        <aside className="w-[350px] border-l border-slate-800 bg-slate-900/50 flex flex-col z-10 shadow-2xl relative">
+          <div className="p-4 border-b border-slate-800 bg-slate-900 flex items-center gap-3 z-10">
+            <div className="p-1.5 bg-emerald-500/20 text-emerald-400 rounded-lg"><Bot className="w-5 h-5"/></div>
+            <div>
+              <h3 className="font-bold text-white">Ask AI Chat</h3>
+              <p className="text-xs text-slate-400">Context: {analyzedRepoUrl ? 'Loaded' : 'None'}</p>
+            </div>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth">
+            {chatMessages.map((msg, idx) => (
+              <motion.div 
+                initial={{ opacity: 0, x: msg.role === 'user' ? 20 : -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                key={idx} 
+                className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                {msg.role === 'assistant' && (
+                  <div className="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-1">
+                    <Bot className="w-4 h-4" />
+                  </div>
+                )}
+                <div className={`p-3 rounded-2xl max-w-[85%] ${
+                  msg.role === 'user' ? 'bg-emerald-600 text-white rounded-tr-sm shadow-md' : 'bg-slate-800/80 text-slate-200 rounded-tl-sm border border-slate-700/50 shadow-inner'
+                }`}>
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.text}</p>
+                </div>
+                {msg.role === 'user' && (
+                  <div className="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center shrink-0 mt-1">
+                    <User className="w-4 h-4 text-slate-300" />
+                  </div>
+                )}
+              </motion.div>
+            ))}
+            {isChatLoading && (
+              <div className="flex gap-3">
+                 <div className="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-1">
+                    <Bot className="w-4 h-4" />
+                  </div>
+                 <div className="p-3 rounded-2xl bg-slate-800/80 border border-slate-700/50 rounded-tl-sm text-sm text-slate-400 flex items-center gap-2">
+                   <Loader2 className="w-4 h-4 animate-spin text-emerald-500" /> Analyzing...
+                 </div>
+              </div>
+            )}
+            <div ref={chatEndRef} />
+          </div>
+
+          <form className="p-4 bg-slate-900 border-t border-slate-800" onSubmit={handleAskAI}>
+            <div className="relative">
+               <input 
+                 type="text" 
+                 disabled={!analyzedRepoUrl || isChatLoading}
+                 value={chatInput}
+                 onChange={e => setChatInput(e.target.value)}
+                 placeholder={analyzedRepoUrl ? "Type your question..." : "Analyze a repo first..."}
+                 className="w-full bg-slate-950 border border-slate-700 rounded-xl py-3 pl-4 pr-12 text-sm text-white focus:outline-none focus:border-emerald-500/50 disabled:opacity-50 transition-colors"
+               />
+               <button 
+                 type="submit"
+                 disabled={!chatInput.trim() || !analyzedRepoUrl || isChatLoading}
+                 className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-emerald-400 hover:text-emerald-300 disabled:text-slate-600 transition-colors"
+               >
+                 {isChatLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 19V5m0 0l-7 7m7-7l7 7"/></svg>}
+               </button>
+            </div>
+          </form>
+        </aside>
+
+      </div>
+    </div>
+  );
+}
+
+
+ FILE: frontend/src/pages/Home.jsx 
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Search, Loader2, CheckCircle2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { initiateSocketConnection, getSocket, disconnectSocket } from '../services/socketService';
+import { analyzeRepository } from '../services/apiService';
+
+const STAGES = ['cloning_started', 'cloning_completed', 'reading_files', 'analyzing_code', 'analysis_completed'];
+
+export default function Home() {
+  const [repoUrl, setRepoUrl] = useState('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [currentStage, setCurrentStage] = useState('');
+  const [error, setError] = useState(null);
+  
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    return () => disconnectSocket();
+  }, []);
+
+  const handleAnalyze = async (e) => {
+    e.preventDefault();
+    if (!repoUrl) return;
+
+    setIsAnalyzing(true);
+    setError(null);
+    setCurrentStage('cloning_started');
+
+    try {
+      initiateSocketConnection();
+      const socket = getSocket();
+
+      socket.on('progress', (data) => {
+        setCurrentStage(data.step);
+      });
+
+      socket.on('progress_error', (data) => {
+        setError(data.message);
+        setIsAnalyzing(false);
+        disconnectSocket();
+      });
+
+      socket.on('connect', async () => {
+        try {
+          const res = await analyzeRepository(repoUrl, socket.id);
+          navigate('/result', { state: { result: res.summary, repoUrl, fileTree: res.fileTree || [], filesDatabase: res.filesDatabase || {} } });
+        } catch (err) {
+          setError(err.message || err.toString());
+          setIsAnalyzing(false);
+        }
+      });
+    } catch {
+      setError('Failed to connect to server');
+      setIsAnalyzing(false);
+    }
+  };
+
+  const currentStageIndex = STAGES.indexOf(currentStage);
+
+  return (
+    <div className="flex flex-col min-h-screen bg-slate-950 text-slate-200 items-center justify-center relative overflow-hidden font-sans selection:bg-emerald-500/30 p-6">
+      {/* Ambient glow matching Result.jsx */}
+      <div className="absolute top-0 left-[20%] w-[600px] h-[300px] bg-emerald-600/10 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-0 right-[10%] w-[400px] h-[200px] bg-teal-600/5 blur-[100px] rounded-full pointer-events-none" />
+
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center max-w-2xl w-full relative z-10"
+      >
+        <span className="px-4 py-1.5 rounded-full bg-emerald-500/10 text-emerald-400 text-sm font-medium border border-emerald-500/20 mb-6 inline-block shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+          AI-Powered Code Intelligence
+        </span>
+        
+        <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-6">
+          Analyze Any Public <br />
+          <span className="bg-gradient-to-r from-emerald-400 via-green-400 to-teal-400 text-transparent bg-clip-text">
+            GitHub Repository
+          </span>
+        </h2>
+        
+        <p className="text-slate-400 text-lg mb-12">
+          Drop a GitHub link below and our AI will generate a complete project summary, breakdown the tech stack, metrics, caching, and suggest improvements.
+        </p>
+
+        <form onSubmit={handleAnalyze} className="relative max-w-xl mx-auto mb-12">
+          <div className="relative group flex items-center">
+            <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-slate-500 group-focus-within:text-emerald-400 transition-colors" />
+            </div>
+            <input
+              type="text"
+              value={repoUrl}
+              onChange={(e) => setRepoUrl(e.target.value)}
+              placeholder="https://github.com/facebook/react"
+              disabled={isAnalyzing}
+              className="w-full bg-slate-900/50 border border-slate-700/80 rounded-2xl py-4 pl-12 pr-36 text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all shadow-lg shadow-emerald-900/20 backdrop-blur-sm"
+            />
+            <button
+              type="submit"
+              disabled={!repoUrl || isAnalyzing}
+              className="absolute right-2 px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 disabled:hover:from-emerald-600 disabled:hover:to-teal-600 text-white font-medium rounded-xl transition-all shadow-md shadow-emerald-500/20"
+            >
+              {isAnalyzing ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'Analyze'}
+            </button>
+          </div>
+          {error && (
+            <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-red-400 text-sm mt-4 text-center px-4 bg-red-500/10 py-2 rounded-xl border border-red-500/20">
+              {error}
+            </motion.p>
+          )}
+        </form>
+
+        <AnimatePresence>
+          {isAnalyzing && (
+            <motion.div
+              initial={{ opacity: 0, height: 0, scale: 0.95 }}
+              animate={{ opacity: 1, height: 'auto', scale: 1 }}
+              exit={{ opacity: 0, height: 0, scale: 0.95 }}
+              className="max-w-xl mx-auto text-left bg-slate-900/60 border border-emerald-500/30 rounded-2xl p-8 backdrop-blur-md shadow-[0_0_30px_rgba(16,185,129,0.15)] overflow-hidden relative"
+            >
+              <div className="absolute top-0 right-0 p-4 opacity-10">
+                <Loader2 className="w-24 h-24 animate-spin text-emerald-500" />
+              </div>
+              <h3 className="text-xl font-bold bg-gradient-to-r from-emerald-100 to-emerald-400 bg-clip-text text-transparent mb-8 flex items-center gap-2">
+                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                 Analysis Timeline
+              </h3>
+              <div className="space-y-8 relative pl-2">
+                {[
+                  { id: 'cloning_started', label: 'Cloning Repository' },
+                  { id: 'reading_files', label: 'Reading Source Code & Computing Metrics' },
+                  { id: 'analyzing_code', label: 'AI Generating Architecture & Insights' },
+                  { id: 'analysis_completed', label: 'Analysis Results Ready' }
+                ].map((step, index) => {
+                  const stepIndex = STAGES.indexOf(step.id);
+                  let status = 'waiting';
+                  if (currentStageIndex > stepIndex) status = 'completed';
+                  else if (currentStageIndex === stepIndex) status = 'active';
+
+                  return (
+                    <div key={step.id} className="relative flex items-center gap-5">
+                      {index !== 3 && (
+                        <div className={`absolute top-8 left-[11px] w-[2px] h-10 ${status === 'completed' ? 'bg-emerald-500' : 'bg-slate-700'}`} />
+                      )}
+                      <div className={`relative z-10 flex items-center justify-center w-6 h-6 rounded-full border-2 transition-all duration-300 ${
+                        status === 'completed' ? 'bg-emerald-500 border-emerald-500 text-white shadow-[0_0_10px_rgba(16,185,129,0.5)]' :
+                        status === 'active' ? 'border-emerald-400 bg-slate-900 text-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.3)]' :
+                        'border-slate-700 bg-slate-900 text-slate-600'
+                      }`}>
+                        {status === 'completed' ? <CheckCircle2 className="w-3.5 h-3.5" /> : 
+                         status === 'active' ? <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" /> : null}
+                      </div>
+                      <span className={`text-base font-medium transition-colors duration-300 ${
+                        status === 'active' ? 'text-white' :
+                        status === 'completed' ? 'text-slate-300' : 'text-slate-600'
+                      }`}>
+                        {step.label}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    </div>
+  );
+}
+
+ FILE: frontend/src/pages/Result.jsx 
+import { useState, useRef, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  ArrowLeft, Target, Layers, Code2, Database, TerminalSquare,
+  Download, Code, FolderTree, MessageSquare, Bot, User,
+  Loader2, Stars, CheckCircle2, ChevronRight, FileCode2,
+  X, Sparkles, Package, FileText, Copy
+} from 'lucide-react';
+import ArchGraph from '../components/ArchGraph';
+import FileTree from '../components/FileTree';
+import ChatBox from '../components/ChatBox';
+import { chatWithRepository, explainFile as explainFileAPI } from '../services/apiService';
+import jsPDF from 'jspdf';
+
+const LANG_NAMES = {
+  js: 'JavaScript', jsx: 'React JSX', ts: 'TypeScript', tsx: 'React TSX',
+  py: 'Python', java: 'Java', cpp: 'C++', go: 'Go', rs: 'Rust',
+  html: 'HTML', css: 'CSS', json: 'JSON', md: 'Markdown'
+};
+
+const LANG_COLORS = {
+  js: '#f7df1e', jsx: '#61dafb', ts: '#3178c6', tsx: '#61dafb',
+  py: '#3776ab', java: '#b07219', cpp: '#f34b7d', go: '#00add8',
+  rs: '#dea584', html: '#e34c26', css: '#563d7c', json: '#f5a623',
+  md: '#083fa1'
+};
+
+export default function Result() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { result: summary, repoUrl, fileTree = [], filesDatabase = {} } = location.state || {};
+
+  useEffect(() => {
+    if (!summary) navigate('/', { replace: true });
+  }, []);
+
+  const [activeTab, setActiveTab] = useState('overview');
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [fileExplanation, setFileExplanation] = useState('');
+  const [isExplaining, setIsExplaining] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState([
+    { role: 'assistant', text: `I've analyzed this repository. Ask me anything about the codebase!` }
+  ]);
+  const [chatInput, setChatInput] = useState('');
+  const [isChatLoading, setIsChatLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const chatEndRef = useRef(null);
+
+  if (!summary) return null;
+
+  const repoName = repoUrl?.replace('https://github.com/', '').replace('.git', '') || 'Repository';
+  const metrics = summary.metrics || {};
+  const languages = metrics.languages || {};
+  const totalLangFiles = Object.values(languages).reduce((a, b) => a + b, 0) || 1;
+
+  const handleFileClick = (node) => {
+    setSelectedFile(node);
+    setFileExplanation('');
+  };
+
+  const handleCloseFile = () => {
+    setSelectedFile(null);
+    setFileExplanation('');
+  };
+
+  const handleExplainFile = async () => {
+    if (!selectedFile || isExplaining) return;
+    const content = filesDatabase[selectedFile.path];
+    if (!content) return;
+    setIsExplaining(true);
+    try {
+      const res = await explainFileAPI(selectedFile.path, content);
+      setFileExplanation(res.explanation);
+    } catch (err) {
+      setFileExplanation('Failed to explain file. ' + (err.message || err));
+    } finally {
+      setIsExplaining(false);
+    }
+  };
+
+  const handleChat = async (e) => {
+    e?.preventDefault();
+    if (!chatInput.trim() || isChatLoading) return;
+    const msg = chatInput;
+    setChatInput('');
+    setChatMessages(prev => [...prev, { role: 'user', text: msg }]);
+    setIsChatLoading(true);
+    try {
+      const history = chatMessages.filter(m => m.role !== 'system');
+      const res = await chatWithRepository(repoUrl, msg, history);
+      setChatMessages(prev => [...prev, { role: 'assistant', text: res.answer }]);
+    } catch (err) {
+      setChatMessages(prev => [...prev, { role: 'assistant', text: 'Error: ' + err.message }]);
+    } finally {
+      setIsChatLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [chatMessages]);
+
+  const copyText = (text) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const downloadPDF = () => {
+    if (!summary) return;
+    const doc = new jsPDF();
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(22);
+    doc.setTextColor(16, 185, 129);
+    doc.text("Repository Analysis Report", 20, 20);
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(0, 0, 0);
+    let y = 35;
+    const addSection = (title, content) => {
+      if (!content) return;
+      if (y > 270) { doc.addPage(); y = 20; }
+      doc.setFont("helvetica", "bold");
+      doc.text(title, 20, y); y += 8;
+      doc.setFont("helvetica", "normal");
+      const lines = doc.splitTextToSize(String(content), 170);
+      for (const line of lines) {
+        if (y > 280) { doc.addPage(); y = 20; }
+        doc.text(line, 20, y); y += 7;
+      }
+      y += 10;
+    };
+    addSection("Project Overview", summary.projectOverview || summary.summary);
+    addSection("Architecture", summary.architecture);
+    addSection("Key Features", summary.keyFeatures?.join('\n- '));
+    addSection("Code Quality Review", summary.codeQualityReview);
+    addSection("Tech Stack", summary.techStack?.join(', '));
+    addSection("Improvements", summary.improvements?.join('\n- '));
+    addSection("Resume Description", summary.resumeDescription);
+    doc.save('repo-analysis.pdf');
+  };
+
+  const tabs = [
+    { id: 'overview', label: 'Overview', icon: Target },
+    { id: 'filetree', label: 'File Tree', icon: FolderTree },
+    { id: 'metrics', label: 'Metrics', icon: Database },
+    { id: 'techstack', label: 'Tech Stack', icon: Package },
+    { id: 'architecture', label: 'Architecture', icon: Layers },
+    { id: 'insights', label: 'Insights', icon: TerminalSquare },
+  ];
+
+  return (
+    <div className="flex flex-col h-screen bg-slate-950 text-slate-200 overflow-hidden font-sans selection:bg-emerald-500/30">
+      {/* Ambient glow */}
+      <div className="absolute top-0 left-[20%] w-[600px] h-[300px] bg-emerald-600/10 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-0 right-[10%] w-[400px] h-[200px] bg-teal-600/5 blur-[100px] rounded-full pointer-events-none" />
+
+      {/* ── HEADER ── */}
+      <header className="h-14 shrink-0 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md flex items-center justify-between px-4 z-20">
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate('/')} className="flex items-center gap-2 px-3 py-1.5 text-sm text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-all">
+            <ArrowLeft className="w-4 h-4" /> Home
+          </button>
+          <div className="w-px h-6 bg-slate-700" />
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+              <Code className="w-3.5 h-3.5 text-white" />
+            </div>
+            <span className="font-semibold text-white text-sm hidden sm:block">{repoName}</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {summary.complexityScore && (
+            <div className="px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold">
+              {summary.complexityScore}
+            </div>
+          )}
+          <button onClick={() => setIsChatOpen(!isChatOpen)} className={`px-3 py-1.5 text-sm rounded-lg flex items-center gap-2 transition-all ${isChatOpen ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-slate-800 text-slate-400 hover:text-white border border-slate-700'}`}>
+            <MessageSquare className="w-4 h-4" /> Chat
+          </button>
+          <button onClick={downloadPDF} className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-emerald-400 text-sm rounded-lg flex items-center gap-2 border border-slate-700 transition-colors">
+            <Download className="w-4 h-4" /> PDF
+          </button>
+        </div>
+      </header>
+
+      {/* ── MAIN LAYOUT ── */}
+      <div className="flex-1 flex overflow-hidden">
+
+        {/* ── MAIN CONTENT ── */}
+        <main className="flex-1 flex flex-col overflow-hidden">
+          {!selectedFile && (
+            <div className="shrink-0 border-b border-slate-800 bg-slate-900/50 px-4 flex items-center gap-1 h-11">
+              {tabs.map(tab => (
+                <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all border-b-2 ${activeTab === tab.id ? 'text-emerald-400 border-emerald-500 bg-slate-800/50' : 'text-slate-500 border-transparent hover:text-slate-300'}`}
+                >
+                  <tab.icon className="w-3.5 h-3.5" /> {tab.label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div className="flex-1 overflow-y-auto p-6 scroll-smooth">
+            <AnimatePresence mode="wait">
+              {selectedFile ? (
+                <motion.div key="file-viewer" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }} className="max-w-5xl mx-auto">
+                  {/* File header */}
+                  <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+                    <div className="flex items-center gap-3">
+                      <FileCode2 className="w-5 h-5 text-emerald-400" />
+                      <span className="font-mono text-sm text-white">{selectedFile.path}</span>
+                      <span className="text-xs text-slate-500 bg-slate-800 px-2 py-0.5 rounded-full">{selectedFile.size} lines</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button onClick={handleExplainFile} disabled={isExplaining}
+                        className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 text-white text-sm font-medium rounded-xl transition-all shadow-md shadow-emerald-500/20 flex items-center gap-2">
+                        {isExplaining ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                        {isExplaining ? 'Analyzing...' : 'Explain with AI'}
+                      </button>
+                      <button onClick={handleCloseFile} className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-all">
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Code viewer */}
+                  <div className="bg-slate-900/80 border border-slate-700/50 rounded-2xl overflow-hidden shadow-lg">
+                    <div className="overflow-auto max-h-[500px]">
+                      <pre className="p-4 text-sm font-mono leading-relaxed">
+                        {(filesDatabase[selectedFile.path] || '').split('\n').map((line, i) => (
+                          <div key={i} className="flex hover:bg-slate-800/50 group">
+                            <span className="text-slate-600 w-12 text-right pr-4 select-none shrink-0 group-hover:text-slate-400 transition-colors">{i + 1}</span>
+                            <span className="text-slate-200 whitespace-pre">{line || ' '}</span>
+                          </div>
+                        ))}
+                      </pre>
+                    </div>
+                  </div>
+
+                  {/* AI Explanation */}
+                  <AnimatePresence>
+                    {(fileExplanation || isExplaining) && (
+                      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-6 glass-card rounded-2xl p-6 border border-emerald-500/20 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-10"><Sparkles className="w-16 h-16 text-emerald-500" /></div>
+                        <h3 className="text-lg font-bold text-emerald-400 mb-4 flex items-center gap-2 relative z-10">
+                          <Sparkles className="w-5 h-5" /> AI Explanation
+                        </h3>
+                        {isExplaining ? (
+                          <div className="flex items-center gap-3 text-slate-400">
+                            <Loader2 className="w-5 h-5 animate-spin text-emerald-500" />
+                            <span>Analyzing file structure, patterns, and logic...</span>
+                          </div>
+                        ) : (
+                          <p className="text-slate-300 leading-relaxed whitespace-pre-wrap relative z-10">{fileExplanation}</p>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              ) : (
+                <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }} className={activeTab === 'filetree' ? "max-w-6xl w-full mx-auto" : "max-w-4xl mx-auto"}>
+
+                  {/* ═══ OVERVIEW TAB ═══ */}
+                  {activeTab === 'overview' && (
+                    <div className="space-y-6">
+                      <h2 className="text-3xl font-bold flex items-center gap-3"><Target className="text-emerald-400 w-8 h-8" /> Project Overview</h2>
+                      <div className="glass-card rounded-2xl p-6 leading-relaxed text-slate-300 text-lg border border-slate-700/50">
+                        {summary.projectOverview || summary.summary}
+                      </div>
+
+                      {/* Quick metrics row */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        {[
+                          { label: 'Files', value: metrics.totalFiles, color: 'from-blue-500 to-cyan-500', icon: FileText },
+                          { label: 'Lines of Code', value: (metrics.linesOfCode || 0).toLocaleString(), color: 'from-emerald-500 to-teal-500', icon: Code },
+                          { label: 'Folders', value: metrics.totalFolders, color: 'from-purple-500 to-pink-500', icon: FolderTree },
+                          { label: 'Main Language', value: metrics.mainLanguage || '—', color: 'from-amber-500 to-orange-500', icon: Code2 },
+                        ].map(m => (
+                          <div key={m.label} className="relative group bg-slate-900/60 border border-slate-700/50 rounded-2xl p-5 flex flex-col items-center text-center overflow-hidden hover:border-slate-600 transition-colors">
+                            <div className={`absolute inset-0 bg-gradient-to-br ${m.color} opacity-[0.04] group-hover:opacity-[0.08] transition-opacity`} />
+                            <m.icon className="w-6 h-6 mb-2 text-slate-400 relative z-10" />
+                            <span className="text-2xl font-bold text-white mb-1 relative z-10">{m.value}</span>
+                            <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest relative z-10">{m.label}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <h3 className="text-xl font-bold mt-8 mb-4 text-white">Code Quality Review</h3>
+                      <div className="glass-card rounded-2xl p-6 text-slate-300 border border-slate-700/50 leading-relaxed whitespace-pre-wrap">
+                        {summary.codeQualityReview}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ═══ FILETREE TAB ═══ */}
+                  {activeTab === 'filetree' && (
+                    <div className="space-y-6">
+                      <h2 className="text-3xl font-bold flex items-center gap-3"><FolderTree className="text-emerald-400 w-8 h-8" /> File Explorer</h2>
+                      <div className="grid grid-cols-1 md:grid-cols-[1fr_350px] gap-6">
+                        <div className="glass-card rounded-2xl border border-slate-700/50 overflow-hidden flex flex-col max-h-[650px] min-h-[400px]">
+                          <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                            <FileTree tree={fileTree} onFileClick={handleFileClick} selectedFile={selectedFile} />
+                          </div>
+                          <div className="p-4 border-t border-slate-700/50 bg-slate-900/80">
+                            <div className="flex gap-6 justify-center text-center">
+                              <div>
+                                <div className="text-xl font-bold text-emerald-400">{metrics.totalFiles || 0}</div>
+                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Files</div>
+                              </div>
+                              <div className="w-px bg-slate-700/50 h-8"></div>
+                              <div>
+                                <div className="text-xl font-bold text-teal-400">{metrics.totalFolders || 0}</div>
+                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Folders</div>
+                              </div>
+                              <div className="w-px bg-slate-700/50 h-8"></div>
+                              <div>
+                                <div className="text-xl font-bold text-cyan-400">{(metrics.linesOfCode || 0).toLocaleString()}</div>
+                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Lines</div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <ChatBox repoUrl={repoUrl} />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ═══ METRICS TAB ═══ */}
+                  {activeTab === 'metrics' && (
+                    <div className="space-y-6">
+                      <h2 className="text-3xl font-bold flex items-center gap-3"><Database className="text-emerald-400 w-8 h-8" /> Code Metrics</h2>
+                      <p className="text-slate-400 text-sm">All metrics are computed directly from the repository source code — not AI-generated text.</p>
+
+                      {/* Big stat cards */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {[
+                          { label: 'Total Files', value: metrics.totalFiles, icon: FileText, color: 'text-blue-400', bg: 'bg-blue-500/10' },
+                          { label: 'Lines of Code', value: (metrics.linesOfCode || 0).toLocaleString(), icon: Code, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+                          { label: 'Folders', value: metrics.totalFolders, icon: FolderTree, color: 'text-purple-400', bg: 'bg-purple-500/10' },
+                          { label: 'Main Language', value: metrics.mainLanguage, icon: Code2, color: 'text-amber-400', bg: 'bg-amber-500/10' },
+                        ].map(m => (
+                          <div key={m.label} className="glass-card rounded-2xl p-6 border border-slate-700/50 flex flex-col items-center justify-center text-center">
+                            <div className={`p-3 rounded-xl mb-3 ${m.bg}`}><m.icon className={`w-7 h-7 ${m.color}`} /></div>
+                            <span className="text-3xl font-bold text-white mb-1">{m.value}</span>
+                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest">{m.label}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Language breakdown */}
+                      <div className="glass-card rounded-2xl p-6 border border-slate-700/50">
+                        <h3 className="text-lg font-bold text-white mb-4">Language Distribution</h3>
+                        <div className="space-y-3">
+                          {Object.entries(languages)
+                            .sort((a, b) => b[1] - a[1])
+                            .map(([ext, count]) => (
+                              <div key={ext} className="flex items-center gap-3">
+                                <span className="w-24 text-sm text-slate-300 font-medium">{LANG_NAMES[ext] || ext.toUpperCase()}</span>
+                                <div className="flex-1 h-6 bg-slate-800/80 rounded-full overflow-hidden relative">
+                                  <motion.div
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${(count / totalLangFiles) * 100}%` }}
+                                    transition={{ duration: 0.8, ease: 'easeOut' }}
+                                    className="h-full rounded-full"
+                                    style={{ backgroundColor: LANG_COLORS[ext] || '#64748b' }}
+                                  />
+                                </div>
+                                <span className="text-sm text-slate-400 w-16 text-right font-mono">{count} files</span>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+
+                      {/* Largest module */}
+                      <div className="glass-card rounded-2xl p-6 border border-slate-700/50 flex items-center gap-6">
+                        <div className="p-4 bg-rose-500/10 rounded-xl text-rose-400"><FileCode2 className="w-8 h-8" /></div>
+                        <div>
+                          <div className="text-sm font-semibold text-slate-400 uppercase tracking-widest mb-1">Largest Module</div>
+                          <div className="text-xl font-bold text-white">{metrics.largestModule?.name || '—'}</div>
+                          <div className="text-sm text-slate-500">{metrics.largestModule?.sizeLines || 0} lines</div>
+                        </div>
+                        <div className="ml-auto text-sm text-slate-500">Max Depth: <span className="text-white font-bold">{metrics.maxFolderDepth}</span></div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ═══ TECH STACK TAB ═══ */}
+                  {activeTab === 'techstack' && (
+                    <div className="space-y-6">
+                      <h2 className="text-3xl font-bold flex items-center gap-3"><Package className="text-emerald-400 w-8 h-8" /> Tech Stack & Dependencies</h2>
+
+                      {/* Detected from package.json */}
+                      {metrics.dependencies?.length > 0 && (
+                        <div className="glass-card rounded-2xl p-6 border border-slate-700/50">
+                          <h3 className="text-lg font-bold text-white mb-1">Detected from package.json</h3>
+                          <p className="text-xs text-slate-500 mb-4">Auto-detected by parsing dependency files — not AI text.</p>
+                          <div className="flex flex-wrap gap-2">
+                            {metrics.dependencies.map((dep, i) => (
+                              <span key={i} className="px-3 py-1.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-slate-200 font-mono hover:border-emerald-500/30 hover:text-emerald-300 transition-colors cursor-default">
+                                {dep}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* AI-detected tech stack */}
+                      <div className="glass-card rounded-2xl p-6 border border-slate-700/50">
+                        <h3 className="text-lg font-bold text-white mb-4">Full Technology Stack</h3>
+                        <div className="flex flex-wrap gap-3">
+                          {summary.techStack?.map((tech, i) => (
+                            <span key={i} className="px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-xl font-medium text-emerald-300 shadow-sm">
+                              {tech}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <h3 className="text-xl font-bold mt-8 mb-4 text-white">Security Analysis</h3>
+                      <div className="glass-card rounded-2xl p-6 text-slate-300 border border-slate-700/50 leading-relaxed whitespace-pre-wrap">
+                        {summary.securityAnalysis}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ═══ ARCHITECTURE TAB ═══ */}
+                  {activeTab === 'architecture' && (
+                    <div className="space-y-6">
+                      <h2 className="text-3xl font-bold flex items-center gap-3"><Layers className="text-emerald-400 w-8 h-8" /> Architecture</h2>
+                      <div className="bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden shadow-inner h-[500px]">
+                        <ArchGraph data={summary.architectureGraph} />
+                      </div>
+                      <div className="glass-card rounded-2xl p-6 text-slate-300 text-base leading-relaxed border border-slate-700/50 whitespace-pre-wrap">
+                        {summary.architecture}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ═══ INSIGHTS TAB ═══ */}
+                  {activeTab === 'insights' && (
+                    <div className="space-y-6">
+                      <h2 className="text-3xl font-bold flex items-center gap-3"><TerminalSquare className="text-emerald-400 w-8 h-8" /> Insights & Features</h2>
+
+                      {/* Resume description */}
+                      <div className="glass-card rounded-2xl p-8 border border-slate-700/50 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-emerald-600/5 opacity-50" />
+                        <div className="absolute top-0 right-0 p-4 opacity-10"><Stars className="w-16 h-16 text-emerald-500" /></div>
+                        <h3 className="text-lg font-bold text-emerald-400 mb-4 relative z-10 flex items-center gap-2">Resume Description <TerminalSquare className="w-4 h-4" /></h3>
+                        <p className="text-xl font-medium italic leading-relaxed text-slate-200 relative z-10 mb-4">"{summary.resumeDescription}"</p>
+                        <button onClick={() => copyText(summary.resumeDescription)}
+                          className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-sm font-medium rounded-lg transition-colors border border-slate-600 relative z-10 flex items-center gap-2 w-max">
+                          <Copy className="w-4 h-4" /> {copied ? 'Copied!' : 'Copy Text'}
+                        </button>
+                      </div>
+
+                      <div className="grid md:grid-cols-2 gap-6">
+                        {/* Key Features */}
+                        <div className="glass-card rounded-2xl p-6 border border-slate-700/50">
+                          <h3 className="text-lg font-bold text-white mb-4">Key Features</h3>
+                          <ul className="space-y-3">
+                            {summary.keyFeatures?.map((f, i) => (
+                              <li key={i} className="flex gap-3 text-slate-300 text-sm">
+                                <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-500 mt-0.5" /> <span>{f}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                        {/* Improvements */}
+                        <div className="glass-card rounded-2xl p-6 border border-slate-700/50">
+                          <h3 className="text-lg font-bold text-white mb-4">Suggested Improvements</h3>
+                          <ul className="space-y-3">
+                            {summary.improvements?.map((f, i) => (
+                              <li key={i} className="flex gap-3 text-slate-300 text-sm">
+                                <ChevronRight className="w-5 h-5 shrink-0 text-amber-500 mt-0.5" /> <span>{f}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </main>
+
+        {/* ── CHAT SIDEBAR ── */}
+        <AnimatePresence>
+          {isChatOpen && (
+            <motion.aside
+              initial={{ width: 0, opacity: 0 }}
+              animate={{ width: 350, opacity: 1 }}
+              exit={{ width: 0, opacity: 0 }}
+              transition={{ duration: 0.25 }}
+              className="border-l border-slate-800 bg-slate-900/50 flex flex-col z-10 shadow-2xl overflow-hidden shrink-0"
+            >
+              <div className="p-4 border-b border-slate-800 bg-slate-900 flex items-center gap-3 shrink-0">
+                <div className="p-1.5 bg-emerald-500/20 text-emerald-400 rounded-lg"><Bot className="w-5 h-5" /></div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-white text-sm">Ask AI Chat</h3>
+                  <p className="text-xs text-slate-400">Context: Loaded</p>
+                </div>
+                <button onClick={() => setIsChatOpen(false)} className="p-1 text-slate-500 hover:text-white rounded transition-colors">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth">
+                {chatMessages.map((msg, idx) => (
+                  <motion.div initial={{ opacity: 0, x: msg.role === 'user' ? 20 : -20 }} animate={{ opacity: 1, x: 0 }} key={idx}
+                    className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    {msg.role === 'assistant' && (
+                      <div className="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-1"><Bot className="w-4 h-4" /></div>
+                    )}
+                    <div className={`p-3 rounded-2xl max-w-[85%] ${msg.role === 'user' ? 'bg-emerald-600 text-white rounded-tr-sm shadow-md' : 'bg-slate-800/80 text-slate-200 rounded-tl-sm border border-slate-700/50 shadow-inner'}`}>
+                      <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.text}</p>
+                    </div>
+                    {msg.role === 'user' && (
+                      <div className="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center shrink-0 mt-1"><User className="w-4 h-4 text-slate-300" /></div>
+                    )}
+                  </motion.div>
+                ))}
+                {isChatLoading && (
+                  <div className="flex gap-3">
+                    <div className="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-1"><Bot className="w-4 h-4" /></div>
+                    <div className="p-3 rounded-2xl bg-slate-800/80 border border-slate-700/50 rounded-tl-sm text-sm text-slate-400 flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin text-emerald-500" /> Thinking...
+                    </div>
+                  </div>
+                )}
+                <div ref={chatEndRef} />
+              </div>
+
+              <form className="p-4 bg-slate-900 border-t border-slate-800 shrink-0" onSubmit={handleChat}>
+                <div className="relative">
+                  <input type="text" value={chatInput} onChange={e => setChatInput(e.target.value)} disabled={isChatLoading}
+                    placeholder="Ask about this repo..."
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl py-3 pl-4 pr-12 text-sm text-white focus:outline-none focus:border-emerald-500/50 disabled:opacity-50 transition-colors" />
+                  <button type="submit" disabled={!chatInput.trim() || isChatLoading}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-emerald-400 hover:text-emerald-300 disabled:text-slate-600 transition-colors">
+                    {isChatLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 19V5m0 0l-7 7m7-7l7 7" /></svg>}
+                  </button>
+                </div>
+              </form>
+            </motion.aside>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}
+
+ FILE: frontend/src/services/apiService.js 
+import axios from 'axios';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
+export const analyzeRepository = async (repoUrl, socketId) => {
+    try {
+        const response = await axios.post(`${API_URL}/repo/analyze`, { repoUrl, socketId });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data?.error || error.message || 'An error occurred during analysis';
+    }
+};
+
+export const chatWithRepository = async (repoUrl, question, history) => {
+    try {
+        const response = await axios.post(`${API_URL}/repo/chat`, { repoUrl, question, history });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data?.error || error.message || 'An error occurred during chat';
+    }
+};
+
+export const explainFile = async (filePath, fileContent) => {
+    try {
+        const response = await axios.post(`${API_URL}/repo/explain-file`, { filePath, fileContent });
+        return response.data;
+    } catch (error) {
+        throw error.response?.data?.error || error.message || 'An error occurred during file explanation';
+    }
+};
+
+
+ FILE: frontend/src/services/socketService.js 
+import { io } from 'socket.io-client';
+
+const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+
+let socket;
+
+export const initiateSocketConnection = () => {
+    socket = io(SOCKET_URL);
+    console.log(`Connecting socket...`);
+};
+
+export const getSocket = () => {
+    return socket;
+};
+
+export const disconnectSocket = () => {
+    if(socket) socket.disconnect();
+}
+
+
+ FILE: frontend/vite.config.js 
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [
+    react(),
+    tailwindcss(),
+  ],
+})
