@@ -19,7 +19,7 @@ Your task is to perform an EXTREMELY DEEP analysis of the entire repository code
 
 This is NOT a summary. This is a full technical evaluation report.
 
-The response MUST be long, section-wise, and highly descriptive.
+The response MUST be medium , section-wise, and highly descriptive.
 
 Return JSON in EXACTLY this structure:
 
@@ -158,7 +158,7 @@ Provide a thorough, well-structured explanation.
       generationConfig: {
         temperature: 0.3,
         maxOutputTokens: 4096,
-      },
+      },cd
     });
 
     return response.candidates?.[0]?.content?.parts

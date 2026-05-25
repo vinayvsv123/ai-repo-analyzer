@@ -8,7 +8,7 @@ const git = simpleGit();
 export const cloneRepo = async (repoUrl) => {
     const repoName = repoUrl.split('/').pop().replace('.git', '');
 
-    // ✅ Use OS temp directory (never locked by OneDrive)
+    //  Use OS temp directory to store cloned repositories
     const baseTempDir = path.join(os.tmpdir(), 'ai-repo-analyzer');
     const clonePath = path.join(baseTempDir, repoName);
 

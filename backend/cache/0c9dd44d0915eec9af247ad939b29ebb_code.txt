@@ -1,0 +1,290 @@
+
+
+ FILE: server/package.json 
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "tsx watch src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@pinecone-database/pinecone": "^7.2.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "langchain": "^1.4.0",
+    "mongoose": "^9.6.2",
+    "multer": "^2.1.1",
+    "pdf-parse": "^2.4.5"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/multer": "^2.1.0",
+    "@types/node": "^25.9.0",
+    "tsx": "^4.22.2",
+    "typescript": "^6.0.3"
+  }
+}
+
+
+ FILE: server/src/app.ts 
+import express from 'express';
+import cors from 'cors';
+
+const app=express();
+
+app.use(cors());
+app.use(express.json());
+
+app.get('/',(req,res)=> {
+    res.send('welcome to the server');
+});
+
+export default app;
+
+
+ FILE: server/src/config/db.ts 
+import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+
+dotenv.config();
+const MONGO_URI = process.env.MONGO_URI || '';
+
+export const connectDB=async()=>{
+    try{
+        await mongoose.connect(MONGO_URI);
+        console.log('MongoDB connected successfully');
+    } catch (error) {
+        console.error('Error connecting to MongoDB:', error);
+        process.exit(1);
+    }
+}
+
+ FILE: server/src/index.ts 
+import express from 'express';
+import app from './app.js';
+import dotenv from 'dotenv';
+import { connectDB } from './config/db.js';
+
+
+dotenv.config();
+const PORT=process.env.PORT || 5000;
+
+connectDB().then(() => {
+    app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+    });
+});
+
+ FILE: server/src/middleware/auth.middleware.ts 
+
+
+ FILE: server/src/models/chatHistory.model.ts 
+import mongoose,{Document as MDocument,Model} from 'mongoose';
+
+interface IMessage{
+    role:'user' | 'assistant';
+    content:string;
+    toolsUsed?:string[];
+    createdAt?:Date;
+}
+
+export interface IChatHistory extends MDocument{
+    userId:mongoose.Types.ObjectId;
+    documentId:mongoose.Types.ObjectId;
+    messages:IMessage[];
+    createdAt:Date;
+   
+}
+
+const messageSchema=new mongoose.Schema<IMessage>({
+    role:{
+        type:String,
+        enum:['user','assistant'],
+        required:true
+    },
+    content:{
+        type:String,
+        required:true
+    },
+    toolsUsed:{
+        type:[String],
+        default:[]
+    },
+    createdAt:{
+        type:Date,
+        default:Date.now
+    }
+});
+
+const chatHistorySchema=new mongoose.Schema<IChatHistory>({
+    userId:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'User',
+        required:true
+    },
+    documentId:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'Document',
+        required:true
+    },
+    messages:[messageSchema],
+    createdAt:{
+        type:Date,
+        default:Date.now
+    }
+   
+},
+{
+    timestamps:true
+});
+
+const ChatHistory:Model<IChatHistory>=mongoose.model<IChatHistory>('ChatHistory',chatHistorySchema);
+export default ChatHistory;
+
+ FILE: server/src/models/document.model.ts 
+import mongoose ,{Document as MDocument,Model}from 'mongoose';
+
+interface IChunk{
+    chunkIndex:number;
+    text:string;
+    pineconeId:string;
+}
+
+export interface IDocument extends MDocument{
+    userId:mongoose.Types.ObjectId;
+    filename:string;
+    originalName:string;
+    namespace:string;
+    pageCount:number;
+    totalChunks:number;
+    chunks:IChunk[];
+    status: 'processing' | 'ready' | 'failed';
+}
+const chunkSchema=new mongoose.Schema<IChunk>({
+    chunkIndex:{
+        type:Number,
+        required:true,
+        index:true
+    },
+    text:{
+        type:String,
+        required:true
+    },
+    pineconeId:{
+        type:String,
+        required:true
+    }
+});
+
+const documentSchema=new mongoose.Schema<IDocument>({
+    userId:{
+      type:mongoose.Schema.Types.ObjectId,
+      ref:'User',
+      required:true
+    },
+    filename:{
+        type:String,
+        required:true   
+    },
+    originalName:{
+        type:String,
+        required:true
+    },
+    namespace:{
+        type:String,
+        required:true    
+    },
+    pageCount:{
+        type:Number,
+    },
+    totalChunks:{
+        type:Number,
+    },
+    chunks:{
+        type:[chunkSchema],
+        default:[]
+    },
+     status:{ 
+        type: String,
+        enum: ['processing', 'ready', 'failed'],
+        default: 'processing'
+    }
+},
+{
+    timestamps:true    
+});
+
+const DocumentModel:Model<IDocument>=mongoose.model<IDocument>('Document',documentSchema);
+export default DocumentModel;
+
+ FILE: server/src/models/user.model.ts 
+import mongoose ,{Document,Model} from 'mongoose';
+
+export interface IUser extends Document{
+    username:string;
+    email:string;
+    password:string;
+    createdAt:Date;
+}
+
+const userSchema=new mongoose.Schema<IUser>({
+    username:{
+        type:String,
+        required:true,
+        unique:true,
+        minlength:4,
+        maxlength:20
+    },
+    email:{
+        type:String,
+        required:true,
+        unique:true,
+        lowercase:true,
+        match:/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/,
+        trim:true
+    },
+    password:{
+        type:String,
+        required:true,
+        minlength:4
+        //unique:true
+    },
+    createdAt:{
+        type:Date,
+        default:Date.now
+    } , 
+},
+{
+    timestamps:true
+});
+
+const User:Model<IUser>=mongoose.model<IUser>('User',userSchema);
+export default User;
+
+ FILE: server/tsconfig.json 
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "NodeNext",
+    "moduleResolution": "nodeNext",
+    "rootDir": "src",
+    "outDir": "dist",
+
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+
+    "types": ["node", "cors"]
+  },
+  "include": ["src"]
+}
