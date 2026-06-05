@@ -1,0 +1,199 @@
+{
+  "projectOverview": "FinAI is an AI-powered personal finance management application designed to help users track and manage their financial health. It features a multi-step onboarding process to capture detailed financial data (income, expenses, assets, liabilities, insurance, dependents, goals). The core functionality includes a personalized dashboard with financial summaries and AI-driven insights, an interactive AI chatbot for financial advice, and a goal-setting and tracking system. The architecture is a full-stack MERN-like setup, integrating advanced AI services and a vector database for intelligent user interaction and data analysis.",
+  "complexityLevel": "Advanced",
+  "complexityScore": "8.0/10",
+  "techStack": [
+    "React.js",
+    "TypeScript",
+    "Vite",
+    "Tailwind CSS",
+    "Framer Motion",
+    "Lucide-React",
+    "React Router DOM",
+    "Axios",
+    "ESLint",
+    "Node.js",
+    "Express.js",
+    "MongoDB",
+    "Mongoose",
+    "Passport.js",
+    "Passport-Google-OAuth20",
+    "JSON Web Token (JWT)",
+    "Bcrypt",
+    "dotenv",
+    "CORS",
+    "Express-Session",
+    "Express-Validator",
+    "Zod",
+    "@google/genai",
+    "@langchain/core",
+    "@langchain/google-genai",
+    "@langchain/langgraph",
+    "@pinecone-database/pinecone"
+  ],
+  "architecture": "The application follows a client-server architecture. The frontend is a React.js single-page application (SPA) built with Vite and TypeScript, using React Router for navigation, Tailwind CSS for styling, and Axios for API communication. User authentication is handled via Google OAuth2.0, with the backend using Passport.js. After successful OAuth, a JWT is generated and sent to the client, stored in `localStorage`, and used for subsequent API requests through a `Bearer` token in the `Authorization` header. The backend, built with Node.js and Express.js, interacts with a MongoDB database using Mongoose for ORM. Critical to the application's intelligence is the AI agent, implemented with LangChain and Google GenAI, which queries user financial data from MongoDB via dedicated 'tools' and leverages Pinecone (a vector database) to manage and retrieve contextual chat history for more relevant AI responses. User data is structured across multiple Mongoose models (User, Income, Expense, Asset, Liability, Dependent, Goal, Conversation, Message) with ObjectId references.",
+  "architectureGraph": {
+    "nodes": [
+      {
+        "id": "frontend",
+        "label": "React Frontend",
+        "group": "frontend"
+      },
+      {
+        "id": "backend",
+        "label": "Express API",
+        "group": "backend"
+      },
+      {
+        "id": "mongodb",
+        "label": "MongoDB",
+        "group": "database"
+      },
+      {
+        "id": "google_oauth",
+        "label": "Google OAuth2.0",
+        "group": "auth"
+      },
+      {
+        "id": "langchain_agent",
+        "label": "LangChain AI Agent",
+        "group": "backend"
+      },
+      {
+        "id": "google_genai",
+        "label": "Google GenAI (LLM)",
+        "group": "ai"
+      },
+      {
+        "id": "pinecone",
+        "label": "Pinecone Vector DB",
+        "group": "database"
+      }
+    ],
+    "edges": [
+      {
+        "source": "frontend",
+        "target": "backend",
+        "label": "REST API (JWT)"
+      },
+      {
+        "source": "frontend",
+        "target": "google_oauth",
+        "label": "Redirect for Login"
+      },
+      {
+        "source": "google_oauth",
+        "target": "backend",
+        "label": "Auth Callback"
+      },
+      {
+        "source": "backend",
+        "target": "mongodb",
+        "label": "Mongoose ORM"
+      },
+      {
+        "source": "backend",
+        "target": "langchain_agent",
+        "label": "Invoke Agent"
+      },
+      {
+        "source": "langchain_agent",
+        "target": "mongodb",
+        "label": "Query User Data (Tools)"
+      },
+      {
+        "source": "langchain_agent",
+        "target": "google_genai",
+        "label": "LLM Calls"
+      },
+      {
+        "source": "langchain_agent",
+        "target": "pinecone",
+        "label": "Embed/Upsert/Search Messages"
+      },
+      {
+        "source": "backend",
+        "target": "mongodb",
+        "label": "Session/User Data"
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Secure Google OAuth2.0 user authentication and JWT-based session management.",
+    "Comprehensive multi-step user profile setup for detailed financial data entry.",
+    "Personalized financial dashboard displaying income/expense analysis and net savings.",
+    "AI chatbot providing real-time financial advice and insights using user's data.",
+    "Financial goal setting, tracking, and progress visualization.",
+    "CRUD operations for managing income sources, expense categories, assets, and liabilities.",
+    "Management of insurance details and dependents information.",
+    "Persistence of AI chat conversations using a vector database for context.",
+    "Interactive UI with Tailwind CSS and Framer Motion for a modern user experience.",
+    "Protected routes ensuring authenticated access to sensitive financial data.",
+    "Server-side input validation for core profile updates."
+  ],
+  "codeQualityReview": "The repository exhibits a clear and logical folder structure, maintaining good separation of concerns between client and server, and further modularizing components/services. Naming conventions are generally consistent and descriptive, enhancing readability. Frontend utilizes React hooks and functional components effectively. Backend leverages Express middleware, Mongoose for data modeling, and an `asyncHandler` utility for consistent error handling. The integration of LangChain's agent architecture with custom tools demonstrates advanced design patterns. However, there are instances of `@ts-nocheck` and `any` types in the TypeScript frontend, indicating areas where type strictness could be improved. While backend input validation exists, it is not consistently applied to all fields across all update endpoints, which could be a point of improvement.",
+  "securityAnalysis": "Authentication relies on Google OAuth2.0 via Passport.js, streamlining the user login process. JWTs are used for subsequent API authorization, correctly implemented with a `verifyUser` middleware for protected routes. However, storing the JWT in `localStorage` on the client-side makes it vulnerable to Cross-Site Scripting (XSS) attacks. While some backend endpoints use `express-validator` for input validation, others (e.g., `updateAssets`, `updateLiabilities`, `createGoals`) lack explicit, comprehensive server-side validation for all fields, posing a risk for data integrity and potential injection vulnerabilities if frontend validation is bypassed. The `passport.deserializeUser` implementation has an undefined `user` variable, which is a bug, though its impact in this specific Google OAuth flow might be limited. Environment variables are correctly used for sensitive keys.",
+  "improvements": [
+    "Migrate JWT storage from `localStorage` to HttpOnly cookies to enhance XSS protection.",
+    "Implement comprehensive server-side input validation using `express-validator` or Zod for *all* fields across *all* API endpoints, especially for `updateAssets`, `updateLiabilities`, `updateInsurance`, `updateDependents`, `updateOtherDetails`, and `createGoals` to prevent data corruption and security vulnerabilities.",
+    "Refine TypeScript usage in the frontend to eliminate `@ts-nocheck` directives and `any` types, ensuring stronger type safety.",
+    "Enhance frontend error handling and provide more explicit user feedback for all API interactions, particularly during form submissions.",
+    "Add unit and integration tests for both frontend components and backend API endpoints/services to ensure robustness and maintainability.",
+    "Implement rate limiting on backend API endpoints to prevent abuse and brute-force attacks.",
+    "Address the undefined 'user' variable in `passport.deserializeUser` for correct Passport.js session management.",
+    "Implement a robust logging system for the backend to monitor application behavior and identify issues.",
+    "Consider adding a more secure mechanism for AI agent 'user ID' management within the `agent.services.js` to ensure proper user context separation and data privacy."
+  ],
+  "resumeDescription": "Developed an AI-powered personal finance management application (FinAI) utilizing React, Node.js/Express, MongoDB, Google GenAI, and Pinecone. Implemented Google OAuth, JWT authentication, and a LangChain AI agent for personalized financial insights, dashboard analytics, and goal tracking, enabling users to efficiently manage their financial health.",
+  "metrics": {
+    "totalFiles": 64,
+    "totalFolders": 18,
+    "linesOfCode": 8044,
+    "maxFolderDepth": 3,
+    "largestModule": {
+      "name": "user.controller.js",
+      "sizeLines": 838
+    },
+    "mainLanguage": "React (TSX)",
+    "languages": {
+      "js": 25,
+      "html": 1,
+      "json": 5,
+      "tsx": 30,
+      "css": 1,
+      "ts": 2
+    },
+    "dependencies": [
+      "@tailwindcss/vite",
+      "axios",
+      "dotenv",
+      "framer-motion",
+      "lucide-react",
+      "react",
+      "react-dom",
+      "react-router-dom",
+      "tailwindcss",
+      "@eslint/js",
+      "@types/react",
+      "@types/react-dom",
+      "@vitejs/plugin-react",
+      "eslint",
+      "eslint-plugin-react-hooks",
+      "eslint-plugin-react-refresh",
+      "globals",
+      "typescript",
+      "typescript-eslint",
+      "vite",
+      "@google/genai",
+      "@langchain/core",
+      "@langchain/google-genai",
+      "@langchain/langgraph",
+      "@pinecone-database/pinecone",
+      "bcrypt",
+      "cors",
+      "express",
+      "express-session",
+      "express-validator"
+    ]
+  }
+}

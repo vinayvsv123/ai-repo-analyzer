@@ -1,0 +1,4785 @@
+
+
+ FILE: backend/package.json 
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.js",
+ "scripts": {
+  "dev": "tsx watch src/index.ts",
+  "build": "tsc",
+  "start": "node dist/index.js"
+},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.5.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^25.6.0",
+    "ts-node-dev": "^2.0.0",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3"
+  }
+}
+
+
+ FILE: backend/src/app.ts 
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import userRoutes from './routes/user.route.js';
+import transactionRoutes from './routes/transaction.route.js';
+
+const app=express();
+
+//middleware
+app.use(express.json());
+
+
+
+
+
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "http://localhost:5175",
+      "http://localhost:3000",
+      "http://127.0.0.1:5173",
+      "http://127.0.0.1:5174",
+      "https://personal-finance-tracker-jet-two.vercel.app"
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    credentials: true,
+  })
+);
+
+//routes
+app.use('/api/users', userRoutes);
+app.use('/api/transactions', transactionRoutes);
+
+app.get('/', (req, res) => {
+  res.send('Welcome to the Personal Finance Tracker API');
+});
+
+export default app;
+
+ FILE: backend/src/config/db.ts 
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+
+
+dotenv.config();
+const connectDB=async(): Promise<void>=>{
+  try{
+    await mongoose.connect(process.env.MONGO_URI as string );
+    console.log('MongoDB connected successfully');
+  }
+  catch(error){
+    console.error('MongoDB connection failed:', error);
+    process.exit(1);
+  }
+}
+export default connectDB;
+
+ FILE: backend/src/controllers/transaction.controller.ts 
+import type { Response } from 'express';
+import Transaction from '../models/transaction.model.js';
+import type { AuthRequest } from '../middleware/authmiddleware.js';
+import { transactionSchema } from '../validators/transaction.validator.js';
+
+
+export const createTransaction = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const parsedData = transactionSchema.parse(req.body);
+
+    const newTransaction = new Transaction({
+      ...parsedData,
+      userId: req.user?.id
+    });
+
+    await newTransaction.save();
+
+    res.status(201).json(newTransaction);
+  } catch (error: any) {
+    res.status(400).json({ message: 'Validation error or server error', error: error.message });
+  }
+};
+
+export const getTransactions = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const transactions = await Transaction.find({ userId: req.user?.id }).sort({ date: -1 });
+    res.status(200).json(transactions);
+  } catch (error: any) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+export const getTransactionById = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const transaction = await Transaction.findOne({ _id: req.params.id, userId: req.user?.id });
+    
+    if (!transaction) {
+      res.status(404).json({ message: 'Transaction not found' });
+      return;
+    }
+
+    res.status(200).json(transaction);
+  } catch (error: any) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+export const updateTransaction = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const parsedData = transactionSchema.partial().parse(req.body);
+
+    const transaction = await Transaction.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user?.id },
+      { $set: parsedData },
+      { new: true }
+    );
+
+    if (!transaction) {
+      res.status(404).json({ message: 'Transaction not found' });
+      return;
+    }
+
+    res.status(200).json(transaction);
+  } catch (error: any) {
+    res.status(400).json({ message: 'Validation error or server error', error: error.message });
+  }
+};
+
+export const deleteTransaction = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const transaction = await Transaction.findOneAndDelete({ _id: req.params.id, userId: req.user?.id });
+
+    if (!transaction) {
+      res.status(404).json({ message: 'Transaction not found' });
+      return;
+    }
+
+    res.status(200).json({ message: 'Transaction deleted successfully' });
+  } catch (error: any) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+
+ FILE: backend/src/controllers/user.controller.ts 
+import type { Request, Response } from 'express';
+import User from '../models/user.model.js';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { registerUserSchema, loginUserSchema } from '../validators/user.validator.js';
+import type { AuthRequest } from '../middleware/authmiddleware.js';
+
+export const registerUser = async (req: Request, res: Response): Promise<void> => {
+  console.log("register user controller hit ");
+  try {
+    const parsedData = registerUserSchema.parse(req.body);
+
+    const existingUser = await User.findOne({
+      $or: [{ email: parsedData.email }, { username: parsedData.username }]
+    });
+
+    if (existingUser) {
+      res.status(400).json({ message: 'User with this email or username already exists' });
+      return;
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(parsedData.password, salt);
+
+    const newUser = new User({
+      username: parsedData.username,
+      email: parsedData.email,
+      password: hashedPassword
+    });
+
+    await newUser.save();
+
+    const token = jwt.sign(
+      { id: newUser._id, email: newUser.email },
+      process.env.JWT_SECRET || 'secret',
+      { expiresIn: '1d' }
+    );
+
+    res.status(201).json({
+      token,
+      user: { id: newUser._id, username: newUser.username, email: newUser.email },
+      message: 'User registered successfully'
+    });
+  } catch (error: any) {
+    res.status(400).json({ message: 'Validation error or server error', error: error.message });
+  }
+};
+
+export const loginUser = async (req: Request, res: Response): Promise<void> => {
+  console.log("login user controller hit ");
+  try {
+    const parsedData = loginUserSchema.parse(req.body);
+
+    const user = await User.findOne({ email: parsedData.email });
+    if (!user) {
+      res.status(400).json({ message: 'Invalid credentials' });
+      return;
+    }
+
+    const isMatch = await bcrypt.compare(parsedData.password, user.password);
+    if (!isMatch) {
+      res.status(400).json({ message: 'Invalid credentials' });
+      return;
+    }
+
+    const token = jwt.sign(
+      { id: user._id, email: user.email },
+      process.env.JWT_SECRET || 'secret',
+      { expiresIn: '1d' }
+    );
+
+    res.status(200).json({ token, user: { id: user._id, username: user.username, email: user.email } });
+  } catch (error: any) {
+    res.status(400).json({ message: 'Validation error or server error', error: error.message });
+  }
+};
+
+export const getProfile = async (req: AuthRequest, res: Response): Promise<void> => {
+  console.log("get profile controller hit");
+  try {
+    if (!req.user) {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) {
+      res.status(404).json({ message: 'User not found' });
+      return;
+    }
+
+    res.status(200).json(user);
+  } catch (error: any) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+
+ FILE: backend/src/index.ts 
+import dotenv from 'dotenv';
+import connectDB from './config/db.js';
+import app from './app.js';
+
+dotenv.config();
+
+const PORT=process.env.PORT || 5000;
+
+const server=async (): Promise<void>=>{
+  try
+  {
+    await connectDB();
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    }); 
+  }
+    catch(error)
+    {
+        console.error('Failed to start the server:', error);
+        process.exit(1);
+        
+    }
+}
+
+server();
+
+
+
+ FILE: backend/src/middleware/authmiddleware.ts 
+import jwt from 'jsonwebtoken';
+import type { Request, Response, NextFunction } from 'express';
+
+export interface AuthRequest extends Request {
+  user?: {
+    id: string;
+    email: string;
+  };
+}
+
+export const authMiddleware = (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res
+        .status(401)
+        .json({ message: 'Access denied. No token provided.' });
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET as string
+    ) as { id: string; email: string };
+
+    req.user = decoded;
+
+    next();
+  } catch (error) {
+    return res.status(401).json({ message: 'Invalid token.' });
+  }
+};
+
+ FILE: backend/src/middleware/validate.ts 
+import type { Request, Response, NextFunction } from 'express';
+import { ZodError, type ZodTypeAny } from 'zod';
+
+export const validateRequest =
+  <T extends ZodTypeAny>(schema: T) =>
+  (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const parsed = schema.parse(req.body);
+
+      // replace body with validated + typed data
+      req.body = parsed;
+
+      next();
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const message = error.issues.map((e) => e.message.trim()).join(', ');
+        return res.status(400).json({ message, errors: error.issues });
+      }
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+  };
+
+ FILE: backend/src/models/transaction.model.ts 
+import mongoose, { Document, Model, Types } from 'mongoose';
+
+export interface ITransaction extends Document {
+  userId: Types.ObjectId;
+  type: 'income' | 'expense';
+  amount: number;
+  category: string;
+  note?: string;
+  date: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const transactionSchema = new mongoose.Schema<ITransaction>({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+  type: {
+    type: String,
+    enum: ['income', 'expense'],
+    required: true,
+  },
+  amount: {
+    type: Number,
+    required: true,
+  },
+  category: {
+    type: String,
+    required: true,
+  },
+  note: {
+    type: String,
+  },
+  date: {
+    type: Date,
+    required: true,
+  }
+}, {
+  timestamps: true,
+});
+
+const Transaction: Model<ITransaction> = mongoose.model<ITransaction>('Transaction', transactionSchema);
+export default Transaction;
+
+ FILE: backend/src/models/user.model.ts 
+import mongoose, { Document, Model } from 'mongoose';
+
+export interface IUser extends Document {
+  username: string;
+  email: string;
+  password: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const userSchema = new mongoose.Schema<IUser>({
+  username: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  password: {
+    type: String,
+    required: true,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+}, {
+  timestamps: true,
+});
+
+const User: Model<IUser> = mongoose.model<IUser>('User', userSchema);
+export default User;
+
+ FILE: backend/src/routes/transaction.route.ts 
+import { Router } from 'express';
+import {
+  createTransaction,
+  getTransactions,
+  getTransactionById,
+  updateTransaction,
+  deleteTransaction
+} from '../controllers/transaction.controller.js';
+import { authMiddleware } from '../middleware/authmiddleware.js';
+import { validateRequest } from '../middleware/validate.js';
+import { transactionSchema } from '../validators/transaction.validator.js';
+
+const router = Router();
+
+// Protect all transaction routes
+router.use(authMiddleware);
+
+// Apply validation to transaction creation
+router.post('/', validateRequest(transactionSchema), createTransaction);
+
+router.get('/', getTransactions);
+router.get('/:id', getTransactionById);
+router.put('/:id', validateRequest(transactionSchema.partial()), updateTransaction);
+router.delete('/:id', deleteTransaction);
+
+export default router;
+
+
+ FILE: backend/src/routes/user.route.ts 
+import { Router } from 'express';
+import type{ Request, Response } from 'express';
+import type{z,ZodSchema} from 'zod';
+import { registerUser, loginUser, getProfile } from '../controllers/user.controller.js';
+import { authMiddleware } from '../middleware/authmiddleware.js';
+import { validateRequest } from '../middleware/validate.js';
+import { registerUserSchema, loginUserSchema } from '../validators/user.validator.js';
+
+const router = Router();
+
+router.post('/register', validateRequest(registerUserSchema), registerUser);
+router.post('/login', validateRequest(loginUserSchema), loginUser);
+router.get('/profile', authMiddleware, getProfile);
+
+export default router;
+
+
+ FILE: backend/src/validators/transaction.validator.ts 
+import { z } from 'zod';
+
+export const transactionSchema = z.object({
+  type: z.enum(['income', 'expense'])
+    .refine(val => val === 'income' || val === 'expense', {
+      message: "Type must be either 'income' or 'expense'",
+    }),
+
+  amount: z.coerce
+    .number()
+    .positive("Amount must be a positive number"),
+
+  category: z
+    .string()
+    .min(3, "Category must be at least 3 characters long")
+    .trim(),
+
+  note: z.string().trim().optional(),
+
+  date: z.coerce.date()
+    .refine(d => !isNaN(d.getTime()), {
+      message: "Please provide a valid date",
+    }),
+});
+
+ FILE: backend/src/validators/user.validator.ts 
+import {z} from 'zod';
+
+export const registerUserSchema=z.object({
+    username:z.string().min(6," Username must be at least 6 characters long"),
+    email:z.string().email(" Please provide a valid email address"),
+    password:z.string().min(6," Password must be at least 6 characters long")
+})
+
+export const loginUserSchema=z.object({
+    email:z.string().email(" Please provide a valid email address"),
+    password:z.string().min(6," Password must be at least 6 characters long")
+})
+
+ FILE: backend/tsconfig.json 
+{
+  // Visit https://aka.ms/tsconfig to read more about this file
+  
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2020",
+
+    "types": ["node"],
+    "lib": ["ES2020"],
+
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "sourceMap": true,
+
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true
+  }
+
+}
+
+
+ FILE: frontend/README.md 
+# React + TypeScript + Vite
+
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+
+Currently, two official plugins are available:
+
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+
+## React Compiler
+
+The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+
+Note: This will impact Vite dev & build performances.
+
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
+
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
+
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
+
+
+ FILE: frontend/eslint.config.js 
+import js from '@eslint/js'
+import globals from 'globals'
+import reactHooks from 'eslint-plugin-react-hooks'
+import reactRefresh from 'eslint-plugin-react-refresh'
+import tseslint from 'typescript-eslint'
+import { defineConfig, globalIgnores } from 'eslint/config'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      js.configs.recommended,
+      tseslint.configs.recommended,
+      reactHooks.configs.flat.recommended,
+      reactRefresh.configs.vite,
+    ],
+    languageOptions: {
+      globals: globals.browser,
+    },
+  },
+])
+
+
+ FILE: frontend/index.html 
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FinanceTracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
+
+ FILE: frontend/package.json 
+{
+  "name": "frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "axios": "^1.16.1",
+    "lucide-react": "^1.16.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "react-router-dom": "^7.15.1",
+    "recharts": "^3.8.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.29.0",
+    "@eslint/js": "^10.0.1",
+    "@rolldown/plugin-babel": "^0.2.3",
+    "@types/babel__core": "^7.20.5",
+    "@types/node": "^24.12.3",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "babel-plugin-react-compiler": "^1.0.0",
+    "eslint": "^10.3.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.6.0",
+    "typescript": "~6.0.2",
+    "typescript-eslint": "^8.59.2",
+    "vite": "^8.0.12"
+  }
+}
+
+
+ FILE: frontend/src/App.css 
+.counter {
+  font-size: 16px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 2px solid transparent;
+  transition: border-color 0.3s;
+  margin-bottom: 24px;
+
+  &:hover {
+    border-color: var(--accent-border);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+.hero {
+  position: relative;
+
+  .base,
+  .framework,
+  .vite {
+    inset-inline: 0;
+    margin: 0 auto;
+  }
+
+  .base {
+    width: 170px;
+    position: relative;
+    z-index: 0;
+  }
+
+  .framework,
+  .vite {
+    position: absolute;
+  }
+
+  .framework {
+    z-index: 1;
+    top: 34px;
+    height: 28px;
+    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
+      scale(1.4);
+  }
+
+  .vite {
+    z-index: 0;
+    top: 107px;
+    height: 26px;
+    width: auto;
+    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
+      scale(0.8);
+  }
+}
+
+#center {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  place-content: center;
+  place-items: center;
+  flex-grow: 1;
+
+  @media (max-width: 1024px) {
+    padding: 32px 20px 24px;
+    gap: 18px;
+  }
+}
+
+#next-steps {
+  display: flex;
+  border-top: 1px solid var(--border);
+  text-align: left;
+
+  & > div {
+    flex: 1 1 0;
+    padding: 32px;
+    @media (max-width: 1024px) {
+      padding: 24px 20px;
+    }
+  }
+
+  .icon {
+    margin-bottom: 16px;
+    width: 22px;
+    height: 22px;
+  }
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+#docs {
+  border-right: 1px solid var(--border);
+
+  @media (max-width: 1024px) {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+#next-steps ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 8px;
+  margin: 32px 0 0;
+
+  .logo {
+    height: 18px;
+  }
+
+  a {
+    color: var(--text-h);
+    font-size: 16px;
+    border-radius: 6px;
+    background: var(--social-bg);
+    display: flex;
+    padding: 6px 12px;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: box-shadow 0.3s;
+
+    &:hover {
+      box-shadow: var(--shadow);
+    }
+    .button-icon {
+      height: 18px;
+      width: 18px;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    li {
+      flex: 1 1 calc(50% - 8px);
+    }
+
+    a {
+      width: 100%;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+  }
+}
+
+#spacer {
+  height: 88px;
+  border-top: 1px solid var(--border);
+  @media (max-width: 1024px) {
+    height: 48px;
+  }
+}
+
+.ticks {
+  position: relative;
+  width: 100%;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: -4.5px;
+    border: 5px solid transparent;
+  }
+
+  &::before {
+    left: 0;
+    border-left-color: var(--border);
+  }
+  &::after {
+    right: 0;
+    border-right-color: var(--border);
+  }
+}
+
+
+ FILE: frontend/src/App.tsx 
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Landing } from './pages/Landing';
+import { Auth } from './pages/Auth';
+import { Dashboard } from './pages/Dashboard';
+import { Analytics } from './pages/Analytics';
+import { Profile } from './pages/Profile';
+
+function App() {
+  return (
+    <Router>
+      <div className="app-container">
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </div>
+    </Router>
+  );
+}
+
+export default App;
+
+
+ FILE: frontend/src/api.ts 
+import axios from 'axios';
+
+let baseURL = import.meta.env.VITE_API_BASE_URL || '/api';
+if (baseURL && !baseURL.endsWith('/api') && !baseURL.endsWith('/api/')) {
+  baseURL = baseURL.endsWith('/') ? `${baseURL}api` : `${baseURL}/api`;
+}
+
+const api = axios.create({
+  baseURL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
+});
+
+export default api;
+
+ FILE: frontend/src/components/Button.css 
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  outline: none;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.btn:focus-visible {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-blue);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Sizes */
+.btn-sm {
+  padding: 0.5rem 0.875rem;
+  font-size: 0.8125rem;
+  min-height: 32px;
+}
+
+.btn-md {
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  min-height: 40px;
+}
+
+.btn-lg {
+  padding: 0.875rem 2rem;
+  font-size: 1rem;
+  min-height: 48px;
+}
+
+.btn-full-width {
+  width: 100%;
+}
+
+/* Variants */
+.btn-primary {
+  background-color: var(--accent-blue);
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--accent-blue-hover);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--border-color);
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.btn-outline:hover:not(:disabled) {
+  background-color: var(--bg-tertiary);
+  border-color: var(--accent-blue);
+}
+
+.btn-danger {
+  background-color: var(--danger);
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: #dc2626;
+}
+
+.btn-ghost {
+  background-color: transparent;
+  color: var(--text-secondary);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+/* Loading */
+.btn-loading .btn-content {
+  opacity: 0;
+}
+
+.btn-spinner {
+  position: absolute;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Touch targets - ensure buttons are easily tappable on mobile */
+@media (max-width: 640px) {
+  .btn-sm {
+    min-height: 40px;
+  }
+
+  .btn-md {
+    min-height: 44px;
+  }
+
+  .btn-lg {
+    min-height: 50px;
+  }
+}
+
+
+
+ FILE: frontend/src/components/Button.tsx 
+import React, { type ButtonHTMLAttributes } from 'react';
+import './Button.css';
+import { Loader2 } from 'lucide-react';
+
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'secondary' | 'outline' | 'danger' | 'ghost';
+  size?: 'sm' | 'md' | 'lg';
+  isLoading?: boolean;
+  fullWidth?: boolean;
+}
+
+export const Button: React.FC<ButtonProps> = ({
+  children,
+  variant = 'primary',
+  size = 'md',
+  isLoading = false,
+  fullWidth = false,
+  className = '',
+  disabled,
+  ...props
+}) => {
+  const classes = [
+    'btn',
+    `btn-${variant}`,
+    `btn-${size}`,
+    fullWidth ? 'btn-full-width' : '',
+    isLoading ? 'btn-loading' : '',
+    className
+  ].filter(Boolean).join(' ');
+
+  return (
+    <button className={classes} disabled={disabled || isLoading} {...props}>
+      {isLoading && <Loader2 className="btn-spinner" size={16} />}
+      <span className="btn-content">{children}</span>
+    </button>
+  );
+};
+
+
+ FILE: frontend/src/components/Card.css 
+.card {
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  transition: box-shadow var(--transition-base), transform var(--transition-base);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.card-header {
+  padding: 1.75rem 1.75rem 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.card-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.card-content {
+  padding: 1.75rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .card {
+    border-radius: var(--radius-lg);
+  }
+
+  .card-header {
+    padding: 1.25rem 1.25rem 0.5rem;
+  }
+
+  .card-content {
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .card {
+    border-radius: var(--radius-lg);
+  }
+
+  .card-header {
+    padding: 1rem 1rem 0.5rem;
+  }
+
+  .card-content {
+    padding: 1rem;
+  }
+
+  .card-title {
+    font-size: 1rem;
+  }
+}
+
+
+
+ FILE: frontend/src/components/Card.tsx 
+import React from 'react';
+import './Card.css';
+
+interface CardProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+export const Card: React.FC<CardProps> = ({ children, className = '' }) => {
+  return <div className={`card ${className}`}>{children}</div>;
+};
+
+export const CardHeader: React.FC<CardProps> = ({ children, className = '' }) => {
+  return <div className={`card-header ${className}`}>{children}</div>;
+};
+
+export const CardTitle: React.FC<CardProps> = ({ children, className = '' }) => {
+  return <h3 className={`card-title ${className}`}>{children}</h3>;
+};
+
+export const CardContent: React.FC<CardProps> = ({ children, className = '' }) => {
+  return <div className={`card-content ${className}`}>{children}</div>;
+};
+
+
+ FILE: frontend/src/components/Input.css 
+.input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  width: 100%;
+}
+
+.input-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  letter-spacing: 0.25px;
+}
+
+.input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 0.875rem;
+  color: var(--text-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.input-field.has-icon {
+  padding-left: 2.625rem;
+}
+
+.input-field::placeholder {
+  color: var(--text-tertiary);
+}
+
+.input-field:hover {
+  border-color: #cbd5e1;
+  background-color: var(--bg-secondary);
+}
+
+.input-field:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--accent-blue-light);
+  background-color: var(--bg-primary);
+}
+
+.input-field.has-error {
+  border-color: var(--danger);
+}
+
+.input-field.has-error:focus {
+  box-shadow: 0 0 0 3px var(--danger-bg);
+}
+
+.input-error {
+  font-size: 0.75rem;
+  color: var(--danger);
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  .input-field {
+    padding: 0.875rem 1rem;
+    font-size: 1rem;
+    min-height: 44px;
+  }
+
+  .input-field.has-icon {
+    padding-left: 2.75rem;
+  }
+
+  .input-icon {
+    left: 0.75rem;
+  }
+}
+
+/* Autofill styling */
+.input-field:-webkit-autofill,
+.input-field:-webkit-autofill:hover,
+.input-field:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--bg-primary) inset;
+  -webkit-text-fill-color: var(--text-primary);
+}
+
+.input-field:-webkit-autofill {
+  -webkit-transition: background-color 5000s ease-in-out 0s;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+
+
+ FILE: frontend/src/components/Input.tsx 
+import React, { type InputHTMLAttributes } from 'react';
+import './Input.css';
+
+interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+  error?: string;
+  icon?: React.ReactNode;
+}
+
+export const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ label, error, icon, className = '', id, ...props }, ref) => {
+    const generatedId = id || Math.random().toString(36).substring(7);
+
+    return (
+      <div className={`input-wrapper ${className}`}>
+        {label && (
+          <label htmlFor={generatedId} className="input-label">
+            {label}
+          </label>
+        )}
+        <div className="input-container">
+          {icon && <div className="input-icon">{icon}</div>}
+          <input
+            ref={ref}
+            id={generatedId}
+            className={`input-field ${icon ? 'has-icon' : ''} ${error ? 'has-error' : ''}`}
+            {...props}
+          />
+        </div>
+        {error && <span className="input-error">{error}</span>}
+      </div>
+    );
+  }
+);
+
+Input.displayName = 'Input';
+
+
+ FILE: frontend/src/components/Modal.css 
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  animation: fadeIn var(--transition-base) ease-out;
+  padding: 1rem;
+}
+
+.modal-container {
+  background-color: var(--bg-primary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-header {
+  padding: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-color);
+  gap: 1rem;
+}
+
+.modal-title {
+  font-size: 1.375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 0.625rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  min-width: 40px;
+  min-height: 40px;
+  flex-shrink: 0;
+}
+
+.modal-close:hover {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.modal-content {
+  padding: 1.75rem;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .modal-container {
+    max-height: 85vh;
+  }
+
+  .modal-header {
+    padding: 1.5rem;
+  }
+
+  .modal-content {
+    padding: 1.5rem;
+  }
+
+  .modal-title {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .modal-overlay {
+    padding: 0.75rem;
+    align-items: flex-end;
+  }
+
+  .modal-container {
+    max-height: 90vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+
+  .modal-header {
+    padding: 1.25rem;
+  }
+
+  .modal-content {
+    padding: 1.25rem;
+  }
+
+  .modal-title {
+    font-size: 1.125rem;
+  }
+}
+
+
+
+ FILE: frontend/src/components/Modal.tsx 
+import React, { useEffect } from 'react';
+import { X } from 'lucide-react';
+import './Modal.css';
+
+interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
+}
+
+export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-container" onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2 className="modal-title">{title}</h2>
+          <button className="modal-close" onClick={onClose}>
+            <X size={20} />
+          </button>
+        </div>
+        <div className="modal-content">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+ FILE: frontend/src/index.css 
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-tertiary: #94a3b8;
+  --border-color: #e2e8f0;
+
+  --accent-blue: #2563eb;
+  --accent-blue-hover: #1d4ed8;
+  --accent-blue-light: #eff6ff;
+
+  --success: #10b981;
+  --success-bg: #d1fae5;
+  --danger: #ef4444;
+  --danger-bg: #fee2e2;
+
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-card: 0 4px 24px -4px rgba(15, 23, 42, 0.04);
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  --transition-fast: 0.15s ease;
+  --transition-base: 0.2s ease;
+  --transition-slow: 0.3s ease;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: 0.3px;
+}
+
+a {
+  color: var(--accent-blue);
+  text-decoration: none;
+  transition: color var(--transition-base);
+}
+
+a:hover {
+  color: var(--accent-blue-hover);
+}
+
+button {
+  font-family: inherit;
+}
+
+input, textarea, select {
+  font-family: inherit;
+}
+
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+@media (max-width: 1024px) {
+  .main-content {
+    padding: 1.5rem 1.25rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .main-content {
+    padding: 1rem;
+  }
+
+  body {
+    line-height: 1.6;
+  }
+}
+
+
+
+ FILE: frontend/src/main.tsx 
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import './index.css';
+import App from './App.tsx';
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
+
+
+ FILE: frontend/src/pages/Analytics.css 
+.analytics-page {
+  min-height: 100vh;
+  background-color: var(--bg-secondary);
+}
+
+.page-header {
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  box-shadow: var(--shadow-sm);
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.back-link {
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.back-link:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.header-title h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+  margin: 0;
+  word-break: break-word;
+}
+
+.analytics-main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 1rem;
+  color: var(--text-secondary);
+}
+
+.spinner-icon {
+  animation: spin 1s linear infinite;
+  color: var(--accent-blue);
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+.chart-card {
+  height: 100%;
+}
+
+.chart-content {
+  padding-top: 1rem;
+}
+
+.pie-container .recharts-legend-wrapper {
+  max-height: 250px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Utilities */
+.text-tertiary { color: var(--text-tertiary); }
+.inline-block { display: inline-block; }
+.font-medium { font-weight: 500; }
+.hover\:underline:hover { text-decoration: underline; }
+.flex { display: flex; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.h-full { height: 100%; }
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (min-width: 1024px) {
+  .charts-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .col-span-full {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 1023px) {
+  .header-content {
+    padding: 1rem 1.25rem;
+  }
+
+  .analytics-main {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .header-title h1 {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .header-content {
+    padding: 0.875rem 1rem;
+  }
+
+  .analytics-main {
+    padding: 1rem;
+  }
+
+  .header-title h1 {
+    font-size: 1.125rem;
+  }
+
+  .header-left {
+    gap: 0.75rem;
+  }
+
+  .charts-grid {
+    gap: 1rem;
+  }
+}
+
+
+
+ FILE: frontend/src/pages/Analytics.tsx 
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { 
+  TrendingUp, 
+  ArrowLeft,
+  Loader2,
+  BarChart2
+} from 'lucide-react';
+import { 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  LineChart, Line, PieChart, Pie, Cell
+} from 'recharts';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/Card';
+import api from '../api';
+import './Analytics.css';
+
+interface Transaction {
+  _id: string;
+  type: 'income' | 'expense';
+  amount: number;
+  category: string;
+  date: string;
+}
+
+const COLORS = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'];
+
+export const Analytics: React.FC = () => {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/auth');
+      return;
+    }
+    
+    const fetchTransactions = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get('/transactions');
+        setTransactions(res.data);
+      } catch (err) {
+        console.error('Failed to fetch transactions', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, [navigate]);
+
+  // Process data for charts
+  
+  // 1. Monthly Income vs Expense
+  const monthlyData = React.useMemo(() => {
+    const data: Record<string, { month: string; income: number; expense: number }> = {};
+    
+    transactions.forEach(t => {
+      const date = new Date(t.date);
+      const monthYear = `${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()}`;
+      
+      if (!data[monthYear]) {
+        data[monthYear] = { month: monthYear, income: 0, expense: 0 };
+      }
+      
+      if (t.type === 'income') {
+        data[monthYear].income += t.amount;
+      } else {
+        data[monthYear].expense += t.amount;
+      }
+    });
+
+    // Sort chronologically (assuming sorting by raw string might not be perfect, but simple enough for demo)
+    return Object.values(data).sort((a, b) => {
+      return new Date(a.month).getTime() - new Date(b.month).getTime();
+    });
+  }, [transactions]);
+
+  // 2. Expense breakdown by category
+  const expenseByCategory = React.useMemo(() => {
+    const data: Record<string, number> = {};
+    
+    transactions.filter(t => t.type === 'expense').forEach(t => {
+      data[t.category] = (data[t.category] || 0) + t.amount;
+    });
+
+    return Object.entries(data).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+  }, [transactions]);
+
+  // 3. Balance trend over time
+  const balanceTrend = React.useMemo(() => {
+    let currentBalance = 0;
+    
+    // Sort transactions by date ascending
+    const sorted = [...transactions].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    
+    // Group by date
+    const dataByDate: Record<string, number> = {};
+    sorted.forEach(t => {
+      const dateStr = new Date(t.date).toLocaleDateString();
+      if (!dataByDate[dateStr]) {
+        dataByDate[dateStr] = 0;
+      }
+      dataByDate[dateStr] += t.type === 'income' ? t.amount : -t.amount;
+    });
+
+    return Object.entries(dataByDate).map(([date, amount]) => {
+      currentBalance += amount;
+      return { date, balance: currentBalance };
+    });
+  }, [transactions]);
+
+  return (
+    <div className="analytics-page">
+      {/* Header */}
+      <header className="page-header">
+        <div className="header-content">
+          <div className="header-left">
+            <Link to="/dashboard" className="back-link">
+              <ArrowLeft size={20} />
+            </Link>
+            <div className="header-title">
+              <BarChart2 size={24} className="text-blue" />
+              <h1>Analytics Dashboard</h1>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="analytics-main">
+        {loading ? (
+          <div className="loading-container">
+            <Loader2 className="spinner-icon" size={40} />
+            <p>Crunching the numbers...</p>
+          </div>
+        ) : transactions.length === 0 ? (
+          <div className="empty-state">
+            <TrendingUp size={48} className="text-tertiary" />
+            <h3>No data to analyze</h3>
+            <p>Add some transactions to see your financial insights.</p>
+            <Link to="/dashboard" className="mt-4 inline-block text-blue font-medium hover:underline">
+              Go back to Dashboard
+            </Link>
+          </div>
+        ) : (
+          <div className="charts-grid">
+            {/* Monthly Income vs Expense */}
+            <Card className="chart-card col-span-full">
+              <CardHeader>
+                <CardTitle>Monthly Cash Flow</CardTitle>
+              </CardHeader>
+              <CardContent className="chart-content">
+                <ResponsiveContainer width="100%" height={350}>
+                  <BarChart data={monthlyData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                    <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} dy={10} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} tickFormatter={(val) => `$${val}`} />
+                    <Tooltip cursor={{ fill: '#f1f5f9' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: 'var(--shadow-md)' }} />
+                    <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                    <Bar dataKey="income" name="Income" fill="var(--success)" radius={[4, 4, 0, 0]} barSize={40} />
+                    <Bar dataKey="expense" name="Expense" fill="var(--danger)" radius={[4, 4, 0, 0]} barSize={40} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            {/* Balance Trend */}
+            <Card className="chart-card">
+              <CardHeader>
+                <CardTitle>Balance Trend</CardTitle>
+              </CardHeader>
+              <CardContent className="chart-content">
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={balanceTrend} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                    <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} dy={10} minTickGap={30} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} tickFormatter={(val) => `$${val}`} />
+                    <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: 'var(--shadow-md)' }} />
+                    <Line type="monotone" dataKey="balance" name="Balance" stroke="var(--accent-blue)" strokeWidth={3} dot={false} activeDot={{ r: 8, strokeWidth: 0 }} />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            {/* Expense Categories */}
+            <Card className="chart-card">
+              <CardHeader>
+                <CardTitle>Expenses by Category</CardTitle>
+              </CardHeader>
+              <CardContent className="chart-content pie-container">
+                {expenseByCategory.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={expenseByCategory}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={100}
+                        paddingAngle={5}
+                        dataKey="value"
+                      >
+                        {expenseByCategory.map((_, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(value) => [`$${Number(value ?? 0).toFixed(2)}`]} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: 'var(--shadow-md)' }} />
+                      <Legend layout="vertical" verticalAlign="middle" align="right" wrapperStyle={{ paddingLeft: '20px' }} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-secondary">
+                    No expense data available
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+};
+
+
+ FILE: frontend/src/pages/Auth.css 
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--accent-blue-light) 0%, var(--bg-primary) 100%);
+  padding: 1rem;
+}
+
+/* Auth Card Wrapper */
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  border: none;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+  border-radius: var(--radius-xl);
+  background: var(--bg-primary);
+  overflow: hidden;
+}
+
+/* Card Content */
+.auth-card-content {
+  padding: 2.5rem;
+}
+
+/* Header */
+.auth-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.auth-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--accent-blue-light), #dbeafe);
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.15);
+}
+
+.auth-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.02em;
+}
+
+.auth-subtitle {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* Error */
+.auth-error {
+  background: linear-gradient(135deg, var(--danger-bg), #fecaca);
+  color: var(--danger);
+  padding: 1rem 1.25rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+  font-size: 0.875rem;
+  text-align: center;
+  border-left: 4px solid var(--danger);
+  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  font-weight: 500;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Form */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Submit Button */
+.auth-submit-btn {
+  margin-top: 1rem;
+  height: 48px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Footer */
+.auth-footer {
+  text-align: center;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.auth-switch-btn {
+  background: none;
+  border: none;
+  color: var(--accent-blue);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 0.375rem;
+  transition: color var(--transition-fast);
+}
+
+.auth-switch-btn:hover {
+  color: var(--accent-blue-hover);
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .auth-card-content {
+    padding: 2rem;
+  }
+
+  .auth-title {
+    font-size: 1.5rem;
+  }
+
+  .auth-logo {
+    width: 64px;
+    height: 64px;
+  }
+}
+
+@media (max-width: 640px) {
+  .auth-container {
+    padding: 1.5rem 1rem;
+  }
+
+  .auth-card {
+    border-radius: var(--radius-lg);
+  }
+
+  .auth-card-content {
+    padding: 1.75rem;
+  }
+
+  .auth-header {
+    margin-bottom: 2rem;
+  }
+
+  .auth-title {
+    font-size: 1.375rem;
+  }
+
+  .auth-subtitle {
+    font-size: 0.875rem;
+  }
+
+  .auth-logo {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 1.25rem;
+  }
+
+  .auth-error {
+    padding: 0.875rem 1rem;
+  }
+
+  .auth-submit-btn {
+    height: 44px;
+    font-size: 0.95rem;
+  }
+
+  .auth-footer {
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    font-size: 0.8125rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .auth-card-content {
+    padding: 1.5rem;
+  }
+
+  .auth-title {
+    font-size: 1.25rem;
+  }
+
+  .auth-logo {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 1rem;
+  }
+}
+
+
+ FILE: frontend/src/pages/Auth.tsx 
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Mail, Lock, User, TrendingUp } from 'lucide-react';
+import { Card, CardContent } from '../components/Card';
+import { Input } from '../components/Input';
+import { Button } from '../components/Button';
+import api from '../api';
+import './Auth.css';
+
+export const Auth: React.FC = () => {
+  const [isLogin, setIsLogin] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    password: ''
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const endpoint = isLogin ? '/users/login' : '/users/register';
+      const payload = isLogin
+        ? { email: formData.email, password: formData.password }
+        : formData;
+
+      const response = await api.post(endpoint, payload);
+
+      if (response.data?.token) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem(
+          'user',
+          JSON.stringify(response.data.user || response.data)
+        );
+        navigate('/dashboard');
+      } else {
+        if (isLogin) navigate('/dashboard');
+        else setIsLogin(true);
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Something went wrong');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="auth-container">
+      <Card className="auth-card">
+        <CardContent className="auth-card-content">
+
+          {/* Header */}
+          <div className="auth-header">
+            <div className="auth-logo">
+              <TrendingUp size={32} color="var(--accent-blue)" />
+            </div>
+            <h1 className="auth-title">
+              {isLogin ? 'Welcome back' : 'Create account'}
+            </h1>
+            <p className="auth-subtitle">
+              {isLogin
+                ? 'Login to continue your finance tracking'
+                : 'Start tracking your finances today'}
+            </p>
+          </div>
+
+          {/* Error */}
+          {error && <div className="auth-error">{error}</div>}
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="auth-form">
+            {!isLogin && (
+              <Input
+                label="Username"
+                name="username"
+                placeholder="johndoe"
+                value={formData.username}
+                onChange={handleChange}
+                icon={<User size={18} />}
+                required
+              />
+            )}
+
+            <Input
+              label="Email"
+              type="email"
+              name="email"
+              placeholder="john@example.com"
+              value={formData.email}
+              onChange={handleChange}
+              icon={<Mail size={18} />}
+              required
+              autoComplete="email"
+            />
+
+            <Input
+              label="Password"
+              type="password"
+              name="password"
+              placeholder="••••••••"
+              value={formData.password}
+              onChange={handleChange}
+              icon={<Lock size={18} />}
+              required
+              autoComplete={isLogin ? "current-password" : "new-password"}
+            />
+
+            <Button
+              type="submit"
+              fullWidth
+              size="lg"
+              isLoading={loading}
+              className="auth-submit-btn"
+            >
+              {isLogin ? 'Sign In' : 'Sign Up'}
+            </Button>
+          </form>
+
+          {/* Switch */}
+          <div className="auth-footer">
+            <p>
+              {isLogin ? "Don't have an account? " : "Already have an account? "}
+              <button
+                type="button"
+                className="auth-switch-btn"
+                onClick={() => {
+                  setIsLogin(!isLogin);
+                  setError('');
+                }}
+              >
+                {isLogin ? 'Sign up' : 'Log in'}
+              </button>
+            </p>
+          </div>
+
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+ FILE: frontend/src/pages/Dashboard.css 
+.dashboard {
+  min-height: 100vh;
+  background-color: var(--bg-secondary);
+}
+
+/* Navbar */
+.navbar {
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  box-shadow: var(--shadow-sm);
+}
+
+.navbar-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+  letter-spacing: -0.025em;
+  transition: transform var(--transition-fast);
+}
+
+.navbar-brand:hover {
+  transform: scale(1.02);
+}
+
+.brand-icon {
+  color: var(--accent-blue);
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  transition: background-color var(--transition-fast);
+}
+
+.user-profile:hover {
+  background-color: var(--bg-secondary);
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: var(--accent-blue-light);
+  color: var(--accent-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.username {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.logout-btn,
+.nav-action-link {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.625rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  min-width: 40px;
+  min-height: 40px;
+}
+
+.nav-action-link:hover {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.logout-btn:hover {
+  background-color: var(--danger-bg);
+  color: var(--danger);
+}
+
+.mobile-menu-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 0.625rem;
+  border-radius: var(--radius-md);
+  min-width: 40px;
+  min-height: 40px;
+}
+
+/* Layout Grid */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.summary-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.summary-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.balance-icon {
+  background-color: var(--accent-blue-light);
+  color: var(--accent-blue);
+}
+
+.income-icon {
+  background-color: var(--success-bg);
+  color: var(--success);
+}
+
+.expense-icon {
+  background-color: var(--danger-bg);
+  color: var(--danger);
+}
+
+.summary-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.summary-label {
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  margin-bottom: 0.375rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.summary-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  word-break: break-word;
+}
+
+.success-text { color: var(--success); }
+.danger-text { color: var(--danger); }
+
+/* Action Bar */
+.action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.section-title {
+  font-size: 1.375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.add-btn-text {
+  margin-left: 0.5rem;
+}
+
+/* Filters Bar */
+.filters-bar {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  align-items: stretch;
+}
+
+.search-input {
+  margin-bottom: 0 !important;
+  flex: 1;
+  min-width: 180px;
+}
+
+.filter-dropdown {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-width: 160px;
+}
+
+.filter-icon {
+  position: absolute;
+  left: 0.75rem;
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+
+.type-select {
+  width: 100%;
+  padding: 0.625rem 0.75rem 0.625rem 2.5rem;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+  height: 100%;
+  transition: all var(--transition-fast);
+}
+
+.type-select:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px var(--accent-blue-light);
+}
+
+/* Table */
+.transactions-card {
+  overflow: hidden;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.transactions-table {
+  width: 100%;
+  border-collapse: collapse;
+  white-space: nowrap;
+}
+
+.transactions-table th {
+  text-align: left;
+  padding: 1rem 1.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-tertiary);
+  position: sticky;
+  top: 0;
+}
+
+.transactions-table td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.transactions-table tbody tr {
+  transition: background-color var(--transition-fast);
+}
+
+.transactions-table tbody tr:hover {
+  background-color: var(--bg-secondary);
+}
+
+.transactions-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.font-medium { font-weight: 500; }
+.text-secondary { color: var(--text-secondary); }
+.text-right { text-align: right !important; }
+.text-center { text-align: center !important; }
+
+.truncate-cell {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.375rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.badge-income {
+  background-color: var(--success-bg);
+  color: var(--success);
+}
+
+.badge-expense {
+  background-color: var(--danger-bg);
+  color: var(--danger);
+}
+
+.action-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+  color: var(--text-tertiary);
+  transition: all var(--transition-fast);
+  min-width: 36px;
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-btn:hover {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.delete-btn:hover {
+  background-color: var(--danger-bg);
+  color: var(--danger);
+}
+
+/* Mobile Transactions */
+.mobile-transactions {
+  display: none;
+  padding: 1rem;
+}
+
+.mobile-transaction-card {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  transition: all var(--transition-fast);
+}
+
+.mobile-transaction-card:active {
+  background-color: var(--bg-secondary);
+}
+
+.mobile-transaction-card:last-child {
+  margin-bottom: 0;
+}
+
+.mtc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  gap: 0.75rem;
+}
+
+.mtc-amount {
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.mtc-body {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1rem;
+}
+
+.mtc-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.mtc-info h4 {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: var(--text-primary);
+}
+
+.mtc-info p {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.mtc-info small {
+  font-size: 0.75rem;
+  color: var(--text-tertiary);
+}
+
+/* Empty State */
+.empty-state {
+  padding: 4rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.empty-icon {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-blue-light), var(--bg-tertiary));
+  color: var(--accent-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.empty-state h3 {
+  font-size: 1.25rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.empty-state p {
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+  max-width: 320px;
+  margin-bottom: 1.5rem;
+}
+
+.mt-4 { margin-top: 1rem; }
+
+/* Modal Form */
+.add-transaction-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.type-toggle {
+  display: flex;
+  background-color: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  padding: 0.375rem;
+  margin-bottom: 1.5rem;
+  gap: 0.375rem;
+}
+
+.toggle-btn {
+  flex: 1;
+  padding: 0.625rem;
+  border: none;
+  background: transparent;
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-height: 36px;
+}
+
+.active-income {
+  background-color: var(--success);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+.active-expense {
+  background-color: var(--danger);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+.textarea-field {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-md);
+  color: white;
+  font-weight: 500;
+  font-size: 0.875rem;
+  box-shadow: var(--shadow-lg);
+  z-index: 100;
+  animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.toast-success {
+  background-color: var(--success);
+}
+
+.toast-error {
+  background-color: var(--danger);
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--border-color);
+  border-top-color: var(--accent-blue);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (min-width: 1024px) {
+  .summary-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 1023px) {
+  .navbar-content {
+    padding: 0.875rem 1.25rem;
+  }
+
+  .summary-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .section-title {
+    font-size: 1.125rem;
+  }
+
+  .action-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .filters-bar {
+    flex-direction: column;
+  }
+
+  .search-input {
+    min-width: auto;
+  }
+
+  .filter-dropdown {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .type-select {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .navbar-content {
+    padding: 0.875rem 1rem;
+    gap: 0.5rem;
+  }
+
+  .navbar-actions {
+    gap: 0.5rem;
+  }
+
+  .username {
+    display: none;
+  }
+
+  .user-profile {
+    padding: 0.375rem;
+    gap: 0;
+  }
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 0.875rem;
+  }
+
+  .navbar-brand {
+    font-size: 1.125rem;
+  }
+
+  .brand-icon {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .summary-value {
+    font-size: 1.375rem;
+  }
+
+  .action-bar {
+    flex-direction: column;
+    align-items: stretch;
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-size: 1rem;
+  }
+
+  .add-btn-text {
+    display: none;
+  }
+
+  .filters-bar {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .transactions-table {
+    display: none;
+  }
+
+  .mobile-transactions {
+    display: block;
+    padding: 0;
+  }
+
+  .mobile-transaction-card {
+    margin-bottom: 0.75rem;
+  }
+
+  .toast {
+    left: 1rem;
+    right: 1rem;
+    bottom: 1rem;
+    text-align: center;
+  }
+
+  .empty-state {
+    padding: 2.5rem 1rem;
+  }
+
+  .empty-icon {
+    width: 80px;
+    height: 80px;
+  }
+
+  .modal-actions {
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .navbar-actions {
+    gap: 0.25rem;
+  }
+
+  .summary-label {
+    font-size: 0.75rem;
+  }
+
+  .summary-value {
+    font-size: 1.25rem;
+  }
+
+  .action-btn {
+    min-width: 32px;
+    min-height: 32px;
+  }
+}
+
+
+
+ FILE: frontend/src/pages/Dashboard.tsx 
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { 
+  LogOut, 
+  Plus, 
+  TrendingUp, 
+  TrendingDown, 
+  DollarSign, 
+  Trash2,
+  Menu,
+  Search,
+  Filter,
+  BarChart2
+} from 'lucide-react';
+import { Card, CardContent } from '../components/Card';
+import { Button } from '../components/Button';
+import { Input } from '../components/Input';
+import { Modal } from '../components/Modal';
+import api from '../api';
+import './Dashboard.css';
+
+interface Transaction {
+  _id: string;
+  type: 'income' | 'expense';
+  amount: number;
+  category: string;
+  date: string;
+  note: string;
+}
+
+export const Dashboard: React.FC = () => {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [user, setUser] = useState<{ username?: string } | null>(null);
+  
+  const navigate = useNavigate();
+
+  // Form state
+  const [formData, setFormData] = useState({
+    type: 'expense',
+    amount: '',
+    category: '',
+    date: new Date().toISOString().split('T')[0],
+    note: ''
+  });
+
+  const fetchTransactions = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/transactions');
+      setTransactions(res.data);
+    } catch (err) {
+      showToast('Failed to fetch transactions', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/auth');
+      return;
+    }
+    
+    try {
+      const userData = JSON.parse(localStorage.getItem('user') || '{}');
+      setUser(userData);
+    } catch (e) {}
+
+    fetchTransactions();
+  }, [navigate]);
+
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/auth');
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await api.post('/transactions', {
+        ...formData,
+        amount: Number(formData.amount)
+      });
+      setIsModalOpen(false);
+      fetchTransactions();
+      showToast('Transaction added successfully', 'success');
+      setFormData({
+        type: 'expense',
+        amount: '',
+        category: '',
+        date: new Date().toISOString().split('T')[0],
+        note: ''
+      });
+    } catch (err) {
+      showToast('Failed to add transaction', 'error');
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this transaction?')) {
+      try {
+        await api.delete(`/transactions/${id}`);
+        fetchTransactions();
+        showToast('Transaction deleted', 'success');
+      } catch (err) {
+        showToast('Failed to delete transaction', 'error');
+      }
+    }
+  };
+
+  const summary = transactions.reduce(
+    (acc, t) => {
+      if (t.type === 'income') {
+        acc.income += t.amount;
+        acc.balance += t.amount;
+      } else {
+        acc.expense += t.amount;
+        acc.balance -= t.amount;
+      }
+      return acc;
+    },
+    { balance: 0, income: 0, expense: 0 }
+  );
+
+  const filteredTransactions = transactions.filter(t => {
+    const matchesSearch = t.category.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          t.note?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFilter = filterType === 'all' || t.type === filterType;
+    return matchesSearch && matchesFilter;
+  });
+
+  return (
+    <div className="dashboard">
+      {/* Navbar */}
+      <nav className="navbar">
+        <div className="navbar-content">
+          <Link to="/" className="navbar-brand">
+            <TrendingUp size={24} className="brand-icon" />
+            <span>FinanceTracker</span>
+          </Link>
+          <div className="navbar-actions">
+            <Link to="/analytics" className="nav-action-link" title="Analytics">
+              <BarChart2 size={20} />
+            </Link>
+            <Link to="/profile" className="user-profile">
+              <div className="avatar">
+                {user?.username?.charAt(0).toUpperCase() || 'U'}
+              </div>
+              <span className="username">{user?.username || 'User'}</span>
+            </Link>
+            <button className="logout-btn" onClick={handleLogout} title="Logout">
+              <LogOut size={20} />
+            </button>
+            <button className="mobile-menu-btn">
+              <Menu size={24} />
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <main className="main-content">
+        {/* Summary Cards */}
+        <div className="summary-grid">
+          <Card>
+            <CardContent className="summary-card">
+              <div className="summary-icon balance-icon">
+                <DollarSign size={24} />
+              </div>
+              <div className="summary-info">
+                <p className="summary-label">Total Balance</p>
+                <h3 className="summary-value">${summary.balance.toFixed(2)}</h3>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="summary-card">
+              <div className="summary-icon income-icon">
+                <TrendingUp size={24} />
+              </div>
+              <div className="summary-info">
+                <p className="summary-label">Total Income</p>
+                <h3 className="summary-value success-text">+${summary.income.toFixed(2)}</h3>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="summary-card">
+              <div className="summary-icon expense-icon">
+                <TrendingDown size={24} />
+              </div>
+              <div className="summary-info">
+                <p className="summary-label">Total Expense</p>
+                <h3 className="summary-value danger-text">-${summary.expense.toFixed(2)}</h3>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Action Bar */}
+        <div className="action-bar">
+          <h2 className="section-title">Recent Transactions</h2>
+          <Button onClick={() => setIsModalOpen(true)}>
+            <Plus size={18} />
+            <span className="add-btn-text">Add Transaction</span>
+          </Button>
+        </div>
+
+        {/* Filters */}
+        <div className="filters-bar">
+          <Input 
+            placeholder="Search transactions..." 
+            icon={<Search size={18} />}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="search-input"
+          />
+          <div className="filter-dropdown">
+            <Filter size={18} className="filter-icon" />
+            <select 
+              value={filterType} 
+              onChange={(e) => setFilterType(e.target.value as any)}
+              className="type-select"
+            >
+              <option value="all">All Types</option>
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Transactions List */}
+        <Card className="transactions-card">
+          {loading ? (
+            <div className="empty-state">
+              <div className="spinner"></div>
+              <p>Loading transactions...</p>
+            </div>
+          ) : filteredTransactions.length > 0 ? (
+            <div className="table-responsive">
+              <table className="transactions-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Type</th>
+                    <th>Note</th>
+                    <th className="text-right">Amount</th>
+                    <th className="text-center">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredTransactions.map(t => (
+                    <tr key={t._id}>
+                      <td>{new Date(t.date).toLocaleDateString()}</td>
+                      <td className="font-medium">{t.category}</td>
+                      <td>
+                        <span className={`badge badge-${t.type}`}>
+                          {t.type}
+                        </span>
+                      </td>
+                      <td className="text-secondary truncate-cell">{t.note || '-'}</td>
+                      <td className={`text-right font-medium ${t.type === 'income' ? 'success-text' : ''}`}>
+                        {t.type === 'income' ? '+' : '-'}${t.amount.toFixed(2)}
+                      </td>
+                      <td className="text-center">
+                        <button 
+                          className="action-btn delete-btn" 
+                          onClick={() => handleDelete(t._id)}
+                          title="Delete"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              
+              {/* Mobile Card View */}
+              <div className="mobile-transactions">
+                {filteredTransactions.map(t => (
+                  <div key={t._id} className="mobile-transaction-card">
+                    <div className="mtc-header">
+                      <span className={`badge badge-${t.type}`}>{t.type}</span>
+                      <span className={`mtc-amount ${t.type === 'income' ? 'success-text' : ''}`}>
+                        {t.type === 'income' ? '+' : '-'}${t.amount.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="mtc-body">
+                      <div className="mtc-info">
+                        <h4>{t.category}</h4>
+                        <p>{t.note || 'No notes'}</p>
+                        <small>{new Date(t.date).toLocaleDateString()}</small>
+                      </div>
+                      <button 
+                        className="action-btn delete-btn" 
+                        onClick={() => handleDelete(t._id)}
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="empty-state">
+              <div className="empty-icon">
+                <DollarSign size={48} />
+              </div>
+              <h3>No transactions found</h3>
+              <p>You haven't added any transactions yet or none match your search.</p>
+              <Button variant="outline" onClick={() => setIsModalOpen(true)} className="mt-4">
+                Add your first transaction
+              </Button>
+            </div>
+          )}
+        </Card>
+      </main>
+
+      {/* Add Transaction Modal */}
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add Transaction">
+        <form onSubmit={handleSubmit} className="add-transaction-form">
+          <div className="type-toggle">
+            <button
+              type="button"
+              className={`toggle-btn ${formData.type === 'income' ? 'active-income' : ''}`}
+              onClick={() => setFormData({ ...formData, type: 'income' })}
+            >
+              Income
+            </button>
+            <button
+              type="button"
+              className={`toggle-btn ${formData.type === 'expense' ? 'active-expense' : ''}`}
+              onClick={() => setFormData({ ...formData, type: 'expense' })}
+            >
+              Expense
+            </button>
+          </div>
+
+          <Input
+            label="Amount"
+            type="number"
+            step="0.01"
+            min="0.01"
+            required
+            value={formData.amount}
+            onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+            placeholder="0.00"
+          />
+
+          <Input
+            label="Category"
+            type="text"
+            required
+            value={formData.category}
+            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+            placeholder="e.g. Groceries, Salary"
+          />
+
+          <Input
+            label="Date"
+            type="date"
+            required
+            value={formData.date}
+            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+          />
+
+          <div className="input-wrapper">
+            <label className="input-label">Note (Optional)</label>
+            <textarea
+              className="input-field textarea-field"
+              value={formData.note}
+              onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+              placeholder="Add details about this transaction..."
+              rows={3}
+            />
+          </div>
+
+          <div className="modal-actions">
+            <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit">Add Transaction</Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`toast toast-${toast.type}`}>
+          {toast.message}
+        </div>
+      )}
+    </div>
+  );
+};
+
+
+ FILE: frontend/src/pages/Landing.css 
+.landing-container {
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  overflow-x: hidden;
+}
+
+.text-blue {
+  color: var(--accent-blue);
+}
+
+.ml-2 {
+  margin-left: 0.5rem;
+}
+
+/* Nav */
+.landing-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.landing-nav-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.landing-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: -0.025em;
+  transition: transform var(--transition-fast);
+}
+
+.landing-brand:hover {
+  transform: scale(1.02);
+}
+
+.landing-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.nav-login-link {
+  font-weight: 500;
+  color: var(--text-secondary);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+}
+
+.nav-login-link:hover {
+  color: var(--text-primary);
+  background-color: var(--bg-secondary);
+}
+
+/* Hero Section */
+.hero-section {
+  padding: 8rem 1.5rem 4rem;
+  text-align: center;
+  background: radial-gradient(circle at 50% -20%, var(--accent-blue-light) 0%, var(--bg-primary) 50%);
+}
+
+.hero-content {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 1rem 0.375rem 0.375rem;
+  background-color: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 2rem;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.badge-pill:hover {
+  background-color: var(--accent-blue-light);
+  border-color: var(--accent-blue);
+}
+
+.badge-new {
+  background-color: var(--accent-blue);
+  color: white;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+  margin-bottom: 1.5rem;
+  max-width: 900px;
+}
+
+.hero-subtitle {
+  font-size: 1.25rem;
+  color: var(--text-secondary);
+  margin-bottom: 2.5rem;
+  max-width: 650px;
+  line-height: 1.7;
+}
+
+.hero-actions {
+  margin-bottom: 4rem;
+}
+
+.hero-btn {
+  padding: 1rem 2.5rem;
+  font-size: 1.125rem;
+  box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.39);
+}
+
+/* Abstract Mockup */
+.hero-image-container {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  perspective: 1000px;
+}
+
+.hero-mockup {
+  background-color: white;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  height: 400px;
+  display: flex;
+  flex-direction: column;
+  transform: rotateX(5deg);
+  transform-origin: top;
+  transition: transform var(--transition-slow);
+}
+
+.hero-mockup:hover {
+  transform: rotateX(0deg);
+}
+
+.mockup-header {
+  height: 40px;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+.mockup-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.mockup-dots span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #e2e8f0;
+  transition: all var(--transition-fast);
+}
+
+.mockup-body {
+  flex: 1;
+  display: flex;
+}
+
+.mockup-sidebar {
+  width: 60px;
+  border-right: 1px solid var(--border-color);
+  background-color: var(--bg-tertiary);
+}
+
+.mockup-content {
+  flex: 1;
+  padding: 2rem;
+  background-color: var(--bg-secondary);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.mockup-cards-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.mockup-card-small {
+  flex: 1;
+  height: 80px;
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.mockup-chart {
+  flex: 1;
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+/* Common Section Styles */
+.section-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 5rem 1.5rem;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.section-header h2 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin-bottom: 1rem;
+}
+
+.section-header p {
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+}
+
+/* Features Grid */
+.features-section {
+  background-color: var(--bg-secondary);
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2rem;
+}
+
+.feature-card {
+  background-color: white;
+  padding: 2.5rem 2rem;
+  border-radius: 1rem;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.feature-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-md);
+}
+
+.feature-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background-color: var(--accent-blue-light);
+  color: var(--accent-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  transition: transform var(--transition-fast);
+}
+
+.feature-card:hover .feature-icon {
+  transform: scale(1.1);
+}
+
+.feature-card h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.feature-card p {
+  color: var(--text-secondary);
+  line-height: 1.7;
+  font-size: 0.95rem;
+}
+
+/* Steps */
+.steps-container {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 2rem;
+  position: relative;
+}
+
+.step-item {
+  flex: 1;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.step-number {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-blue-hover));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.125rem;
+  margin-bottom: 1.5rem;
+}
+
+.step-icon {
+  color: var(--accent-blue);
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  background-color: var(--accent-blue-light);
+  border-radius: 50%;
+  transition: all var(--transition-base);
+}
+
+.step-item:hover .step-icon {
+  background-color: var(--bg-tertiary);
+  transform: scale(1.1);
+}
+
+.step-item h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.step-item p {
+  color: var(--text-secondary);
+  line-height: 1.7;
+  font-size: 0.95rem;
+}
+
+.step-connector {
+  flex: 0.2;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+  margin-top: 16px;
+}
+
+/* CTA */
+.cta-section {
+  padding: 6rem 1.5rem;
+  text-align: center;
+  background: linear-gradient(135deg, var(--text-primary) 0%, rgba(15, 23, 42, 0.95) 100%);
+  color: white;
+}
+
+.cta-container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.cta-container h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin-bottom: 1.5rem;
+}
+
+.cta-container p {
+  font-size: 1.125rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 2.5rem;
+  line-height: 1.7;
+}
+
+.cta-btn {
+  background-color: white;
+  color: var(--text-primary);
+  transition: all var(--transition-base);
+}
+
+.cta-btn:hover {
+  background-color: var(--bg-secondary);
+  transform: translateY(-2px);
+}
+
+/* Footer */
+.footer {
+  border-top: 1px solid var(--border-color);
+  padding: 3rem 1.5rem;
+  background-color: white;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 1.125rem;
+}
+
+.footer-copyright {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .section-container {
+    padding: 4rem 1.5rem;
+  }
+
+  .hero-title {
+    font-size: 3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 6rem 1.5rem 3rem;
+  }
+
+  .hero-title {
+    font-size: 2.25rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .hero-btn {
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
+  }
+
+  .hero-image-container {
+    margin-top: 2rem;
+  }
+
+  .hero-mockup {
+    height: 300px;
+  }
+
+  .section-container {
+    padding: 3rem 1.5rem;
+  }
+
+  .section-header h2 {
+    font-size: 1.875rem;
+  }
+
+  .section-header p {
+    font-size: 1rem;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .steps-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 3rem;
+  }
+
+  .step-connector {
+    display: none;
+  }
+
+  .step-item {
+    max-width: 300px;
+  }
+
+  .cta-section {
+    padding: 4rem 1.5rem;
+  }
+
+  .cta-container h2 {
+    font-size: 1.875rem;
+  }
+
+  .cta-container p {
+    font-size: 1rem;
+  }
+
+  .footer {
+    padding: 2rem 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .landing-nav-content {
+    padding: 0.875rem 1rem;
+  }
+
+  .landing-brand {
+    font-size: 1.125rem;
+  }
+
+  .landing-nav-actions {
+    gap: 0.5rem;
+  }
+
+  .hero-section {
+    padding: 5.5rem 1rem 2rem;
+  }
+
+  .hero-title {
+    font-size: 1.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .hero-subtitle {
+    font-size: 0.95rem;
+    max-width: 100%;
+  }
+
+  .hero-actions {
+    margin-bottom: 2.5rem;
+  }
+
+  .hero-mockup {
+    height: 250px;
+  }
+
+  .mockup-sidebar {
+    width: 45px;
+  }
+
+  .mockup-content {
+    padding: 1rem;
+  }
+
+  .section-container {
+    padding: 2.5rem 1rem;
+  }
+
+  .section-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .section-header p {
+    font-size: 0.95rem;
+  }
+
+  .features-grid {
+    gap: 1.5rem;
+  }
+
+  .feature-card {
+    padding: 1.5rem;
+  }
+
+  .step-item h3 {
+    font-size: 1.125rem;
+  }
+
+  .cta-section {
+    padding: 3rem 1rem;
+  }
+
+  .cta-container h2 {
+    font-size: 1.5rem;
+  }
+
+  .cta-btn {
+    width: 100%;
+  }
+
+  .footer {
+    padding: 1.5rem 1rem;
+  }
+
+  .footer-brand {
+    font-size: 1rem;
+  }
+
+  .footer-copyright {
+    font-size: 0.8125rem;
+  }
+
+  .landing-nav-actions {
+    gap: 0.75rem;
+  }
+}
+
+
+ FILE: frontend/src/pages/Landing.tsx 
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { 
+  TrendingUp, 
+  BarChart2, 
+  ShieldCheck, 
+  PieChart,
+  ArrowRight,
+  UserPlus,
+  DollarSign,
+  Activity
+} from 'lucide-react';
+import { Button } from '../components/Button';
+import './Landing.css';
+
+export const Landing: React.FC = () => {
+  return (
+    <div className="landing-container">
+      {/* Navigation */}
+      <nav className="landing-nav">
+        <div className="landing-nav-content">
+          <div className="landing-brand">
+            <TrendingUp size={28} className="brand-icon" />
+            <span>FinanceTracker</span>
+          </div>
+          <div className="landing-nav-actions">
+            <Link to="/auth" className="nav-login-link">Log in</Link>
+            <Link to="/auth">
+              <Button size="sm">Sign up</Button>
+            </Link>
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <header className="hero-section">
+        <div className="hero-content">
+          <div className="badge-pill">
+            <span className="badge-new">New</span>
+            <span>Analytics dashboard is now live</span>
+          </div>
+          <h1 className="hero-title">
+            Track your income, expenses & <span className="text-blue">financial growth</span> effortlessly
+          </h1>
+          <p className="hero-subtitle">
+            Take control of your money. FinanceTracker provides simple, secure, and beautiful tools to manage your personal finances like a pro.
+          </p>
+          <div className="hero-actions">
+            <Link to="/auth">
+              <Button size="lg" className="hero-btn">
+                Start tracking for free
+                <ArrowRight size={18} className="ml-2" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </header>
+
+      {/* Features Section */}
+      <section className="features-section">
+        <div className="section-container">
+          <div className="section-header">
+            <h2>Everything you need to manage your money</h2>
+            <p>Powerful tools designed for simplicity and clarity.</p>
+          </div>
+          <div className="features-grid">
+            <div className="feature-card">
+              <div className="feature-icon"><DollarSign size={24} /></div>
+              <h3>Track income & expenses</h3>
+              <p>Easily log your daily transactions, categorize them, and add helpful notes for future reference.</p>
+            </div>
+            <div className="feature-card">
+              <div className="feature-icon"><BarChart2 size={24} /></div>
+              <h3>Visual analytics</h3>
+              <p>Beautiful, interactive charts that give you a bird's-eye view of your financial health at a glance.</p>
+            </div>
+            <div className="feature-card">
+              <div className="feature-icon"><PieChart size={24} /></div>
+              <h3>Monthly insights</h3>
+              <p>Understand your spending habits with detailed category breakdowns and trend analysis.</p>
+            </div>
+            <div className="feature-card">
+              <div className="feature-icon"><ShieldCheck size={24} /></div>
+              <h3>Secure authentication</h3>
+              <p>Your financial data is protected with industry-standard JWT authentication and security practices.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section className="steps-section">
+        <div className="section-container">
+          <div className="section-header">
+            <h2>How it works</h2>
+            <p>Get started in three simple steps</p>
+          </div>
+          <div className="steps-container">
+            <div className="step-item">
+              <div className="step-number">1</div>
+              <div className="step-icon"><UserPlus size={32} /></div>
+              <h3>Sign up</h3>
+              <p>Create your free account in seconds. No credit card required.</p>
+            </div>
+            <div className="step-connector"></div>
+            <div className="step-item">
+              <div className="step-number">2</div>
+              <div className="step-icon"><DollarSign size={32} /></div>
+              <h3>Add transactions</h3>
+              <p>Log your income and expenses as they happen with our simple modal.</p>
+            </div>
+            <div className="step-connector"></div>
+            <div className="step-item">
+              <div className="step-number">3</div>
+              <div className="step-icon"><Activity size={32} /></div>
+              <h3>View insights</h3>
+              <p>Watch your dashboard populate with actionable insights and beautiful charts.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="cta-section">
+        <div className="cta-container">
+          <h2>Ready to take control of your finances?</h2>
+          <p>Join thousands of users who are already tracking their financial growth.</p>
+          <Link to="/auth">
+            <Button size="lg" className="cta-btn">Create your free account</Button>
+          </Link>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="footer">
+        <div className="footer-content">
+          <div className="footer-brand">
+            <TrendingUp size={24} className="brand-icon" />
+            <span>FinanceTracker</span>
+          </div>
+          <p className="footer-copyright">© {new Date().getFullYear()} FinanceTracker. All rights reserved.</p>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+
+ FILE: frontend/src/pages/Profile.css 
+.profile-page {
+  min-height: 100vh;
+  background-color: var(--bg-secondary);
+}
+
+.profile-main {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.profile-card {
+  width: 100%;
+}
+
+.profile-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 2.5rem;
+}
+
+.profile-avatar-large {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-blue-light) 0%, #dbeafe 100%);
+  color: var(--accent-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 3rem;
+  margin-bottom: 1.75rem;
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.15);
+  transition: transform var(--transition-base);
+}
+
+.profile-avatar-large:hover {
+  transform: scale(1.05);
+}
+
+.profile-name {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.profile-role {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--accent-blue);
+  background-color: var(--accent-blue-light);
+  padding: 0.375rem 0.875rem;
+  border-radius: 9999px;
+  margin-bottom: 2.5rem;
+}
+
+.profile-details {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 3rem;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color var(--transition-fast);
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-item:hover {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.detail-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background-color: var(--accent-blue-light);
+  color: var(--accent-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.detail-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.detail-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.375rem;
+}
+
+.detail-value {
+  font-size: 1rem;
+  color: var(--text-primary);
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.profile-actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.full-width-link {
+  width: 100%;
+  display: block;
+}
+
+.logout-btn {
+  background-color: var(--danger-bg);
+  color: var(--danger);
+  transition: all var(--transition-base);
+}
+
+.logout-btn:hover {
+  background-color: #fecaca;
+  color: #dc2626;
+}
+
+.mr-1 { margin-right: 0.25rem; }
+.mr-2 { margin-right: 0.5rem; }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .profile-main {
+    padding: 2rem 1.5rem;
+  }
+
+  .profile-content {
+    padding: 2rem 1.75rem;
+  }
+
+  .profile-avatar-large {
+    width: 100px;
+    height: 100px;
+    font-size: 2.5rem;
+  }
+
+  .profile-name {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .profile-main {
+    padding: 1.5rem 1rem;
+  }
+
+  .profile-content {
+    padding: 1.75rem 1.25rem;
+  }
+
+  .profile-avatar-large {
+    width: 80px;
+    height: 80px;
+    font-size: 2rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.1);
+  }
+
+  .profile-name {
+    font-size: 1.375rem;
+  }
+
+  .profile-role {
+    font-size: 0.8125rem;
+    padding: 0.25rem 0.75rem;
+  }
+
+  .detail-item {
+    gap: 1rem;
+    padding: 1rem 0;
+  }
+
+  .detail-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .detail-value {
+    font-size: 0.95rem;
+  }
+
+  .profile-details {
+    margin-bottom: 2rem;
+  }
+
+  .profile-actions {
+    gap: 0.75rem;
+  }
+}
+
+
+
+ FILE: frontend/src/pages/Profile.tsx 
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { 
+  User, 
+  Mail, 
+  ArrowLeft, 
+  LogOut,
+  Calendar,
+  Shield
+} from 'lucide-react';
+import { Card, CardContent } from '../components/Card';
+import { Button } from '../components/Button';
+import './Profile.css';
+
+interface UserProfile {
+  username: string;
+  email: string;
+  createdAt?: string;
+}
+
+export const Profile: React.FC = () => {
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/auth');
+      return;
+    }
+    
+    // Fallback to localStorage user data if /profile endpoint isn't ready
+    try {
+      const userData = JSON.parse(localStorage.getItem('user') || '{}');
+      setUser({
+        username: userData.username || 'User',
+        email: userData.email || 'user@example.com',
+        createdAt: userData.createdAt || new Date().toISOString()
+      });
+    } catch (e) {
+      setUser({ username: 'User', email: 'user@example.com' });
+    }
+  }, [navigate]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/auth');
+  };
+
+  if (!user) return null;
+
+  return (
+    <div className="profile-page">
+      {/* Header */}
+      <header className="page-header">
+        <div className="header-content">
+          <div className="header-left">
+            <Link to="/dashboard" className="back-link">
+              <ArrowLeft size={20} />
+            </Link>
+            <div className="header-title">
+              <h1>My Profile</h1>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="profile-main">
+        <Card className="profile-card">
+          <CardContent className="profile-content">
+            <div className="profile-avatar-large">
+              {user.username.charAt(0).toUpperCase()}
+            </div>
+            
+            <h2 className="profile-name">{user.username}</h2>
+            <div className="profile-role">
+              <Shield size={14} className="mr-1" />
+              Standard User
+            </div>
+
+            <div className="profile-details">
+              <div className="detail-item">
+                <div className="detail-icon"><User size={18} /></div>
+                <div className="detail-info">
+                  <span className="detail-label">Username</span>
+                  <span className="detail-value">{user.username}</span>
+                </div>
+              </div>
+
+              <div className="detail-item">
+                <div className="detail-icon"><Mail size={18} /></div>
+                <div className="detail-info">
+                  <span className="detail-label">Email Address</span>
+                  <span className="detail-value">{user.email}</span>
+                </div>
+              </div>
+
+              <div className="detail-item">
+                <div className="detail-icon"><Calendar size={18} /></div>
+                <div className="detail-info">
+                  <span className="detail-label">Member Since</span>
+                  <span className="detail-value">
+                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="profile-actions">
+              <Link to="/dashboard" className="full-width-link">
+                <Button variant="outline" fullWidth>
+                  Back to Dashboard
+                </Button>
+              </Link>
+              <Button variant="danger" fullWidth onClick={handleLogout} className="logout-btn">
+                <LogOut size={18} className="mr-2" />
+                Sign Out
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </main>
+    </div>
+  );
+};
+
+
+ FILE: frontend/tsconfig.app.json 
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "es2023",
+    "lib": ["ES2023", "DOM"],
+    "module": "esnext",
+    "types": ["vite/client"],
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src"]
+}
+
+
+ FILE: frontend/tsconfig.json 
+{
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ]
+}
+
+
+ FILE: frontend/tsconfig.node.json 
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+    "target": "es2023",
+    "lib": ["ES2023"],
+    "module": "esnext",
+    "types": ["node"],
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+
+    /* Linting */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["vite.config.ts"]
+}
+
+
+ FILE: frontend/vite.config.ts 
+import { defineConfig } from 'vite'
+import react, { reactCompilerPreset } from '@vitejs/plugin-react'
+import babel from '@rolldown/plugin-babel'
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [
+    react(),
+    babel({ presets: [reactCompilerPreset()] })
+  ],
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:5000',
+        changeOrigin: true
+      }
+    }
+  }
+})

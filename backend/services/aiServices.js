@@ -13,48 +13,41 @@ export const analyzeCodeWithAI = async (repoCode) => {
 
   try {
     const prompt = `
-You are a senior software architect and university project evaluator.
+You are a senior software architect evaluating a full codebase.
 
-Your task is to perform an EXTREMELY DEEP analysis of the entire repository code and generate a VERY LARGE, DETAILED, STRUCTURED JSON report.
-
-This is NOT a summary. This is a full technical evaluation report.
-
-The response MUST be medium , section-wise, and highly descriptive.
-
-Return JSON in EXACTLY this structure:
+Return ONLY valid JSON in the exact format below. No markdown, no explanation.
 
 {
-  "projectOverview": "Write a 25-40 line detailed explanation covering purpose, architecture, user flow, and design decisions.",
+  "projectOverview": "8–12 lines summary of purpose, architecture, and flow",
   "complexityLevel": "Beginner | Intermediate | Advanced",
-  "complexityScore": "Give a score like 7.8/10",
-  "techStack": ["List ALL technologies, libraries, frameworks detected"],
-  "architecture": "Write 30+ lines explaining frontend, backend, database schema, authentication flow, API flow, socket flow, and overall system design.",
+  "complexityScore": "e.g. 7.8/10",
+  "techStack": ["detected technologies"],
+  "architecture": "10–15 lines explaining system design (frontend, backend, DB, auth, APIs, sockets)",
   "architectureGraph": {
     "nodes": [
-      {"id": "frontend", "label": "React Frontend", "group": "frontend"},
-      {"id": "backend", "label": "Express API", "group": "backend"},
-      {"id": "db", "label": "MongoDB", "group": "database"}
+      {"id": "frontend", "label": "Frontend", "group": "frontend"},
+      {"id": "backend", "label": "Backend", "group": "backend"},
+      {"id": "db", "label": "Database", "group": "database"}
     ],
     "edges": [
-      {"source": "frontend", "target": "backend", "label": "REST API"},
-      {"source": "backend", "target": "db", "label": "Mongoose"}
+      {"source": "frontend", "target": "backend", "label": "API"},
+      {"source": "backend", "target": "db", "label": "DB Access"}
     ]
   },
-  "keyFeatures": ["Write each feature with 3-5 lines of explanation"],
-  "codeQualityReview": "Write 25+ lines reviewing folder structure, modularity, separation of concerns, naming, patterns, and best practices.",
-  "securityAnalysis": "Write 20+ lines explaining password handling, JWT, OAuth, protected routes, validation, and security practices.",
-  "improvements": ["List real, practical improvements based on the codebase"],
-  "resumeDescription": "Write a strong 4-5 line resume-ready description."
+  "keyFeatures": ["short feature statements"],
+  "codeQualityReview": "8–12 lines review of structure and best practices",
+  "securityAnalysis": "8–12 lines security evaluation",
+  "improvements": ["practical improvements"],
+  "resumeDescription": "2–3 line strong resume summary"
 }
 
-STRICT RULES:
-- DO NOT summarize.
-- DO NOT shorten explanations.
-- Be extremely verbose and technical.
-- Make sure "architectureGraph" accurately outlines Backend modules, Frontend, DB models, Auth, and Sockets based on code. Group can be 'frontend', 'backend', 'database', 'auth', or 'socket'.
+Rules:
+- Keep responses concise and factual.
+- Detect architecture from code (do not assume).
+- Group in graph: frontend, backend, database, auth, socket only.
+- If unsure, infer conservatively.
 
-Now analyze this repository code deeply:
-
+Repository:
 ${repoCode}
 `;
 
@@ -158,7 +151,7 @@ Provide a thorough, well-structured explanation.
       generationConfig: {
         temperature: 0.3,
         maxOutputTokens: 4096,
-      },cd
+      },
     });
 
     return response.candidates?.[0]?.content?.parts

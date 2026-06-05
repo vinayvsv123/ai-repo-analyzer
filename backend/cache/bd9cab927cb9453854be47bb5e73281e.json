@@ -1,0 +1,223 @@
+{
+  "projectOverview": "This project is a personal finance tracker web application, enabling users to manage their income and expenses. It features user authentication, a dashboard to view and categorize transactions, comprehensive analytics with various charts (monthly cash flow, balance trend, expense breakdown), and a user profile page. The architecture is a classic MERN stack, with a React frontend interacting via REST APIs with an Express.js backend, storing data in MongoDB. Key design decisions include robust input validation with Zod, JWT-based authentication for secure access, and a modular component structure for maintainability and reusability on the frontend.",
+  "complexityLevel": "Intermediate",
+  "complexityScore": "7.5/10",
+  "techStack": [
+    "Node.js",
+    "Express.js",
+    "MongoDB",
+    "Mongoose",
+    "React",
+    "TypeScript",
+    "Vite",
+    "Axios",
+    "Zod",
+    "bcrypt",
+    "jsonwebtoken (JWT)",
+    "cors",
+    "dotenv",
+    "lucide-react",
+    "react-router-dom",
+    "recharts",
+    "CSS"
+  ],
+  "architecture": "The application follows a client-server architecture. The **Frontend** is built with React and TypeScript, using Vite for bundling and React Router for navigation. It consumes RESTful APIs exposed by the backend via Axios, managing global state (like user authentication status) via local storage. The **Backend** is a Node.js Express.js server, written in TypeScript. It handles API requests, user authentication, and transaction management. **Database** interaction is managed by Mongoose, connecting to MongoDB, with two primary schemas: `User` (username, email, password) and `Transaction` (userId, type, amount, category, note, date). The **Authentication Flow** involves user registration and login, generating and verifying JSON Web Tokens (JWTs). Passwords are securely hashed using bcrypt. The JWT is stored in local storage on the client and sent with subsequent requests via an Axios interceptor to access **Protected API Routes**. A custom `authMiddleware` on the backend validates these tokens. **API Flow** defines endpoints for user management (`/api/users/register`, `/api/users/login`, `/api/users/profile`) and transaction CRUD operations (`/api/transactions`, `/api/transactions/:id`). Input validation for all API requests is strictly enforced using Zod schemas via a generic `validateRequest` middleware. There is no explicit **Socket Flow** detected in this codebase.",
+  "architectureGraph": {
+    "nodes": [
+      {
+        "id": "react-frontend",
+        "label": "React Frontend (Vite)",
+        "group": "frontend"
+      },
+      {
+        "id": "express-backend",
+        "label": "Express.js Backend",
+        "group": "backend"
+      },
+      {
+        "id": "mongodb",
+        "label": "MongoDB Database",
+        "group": "database"
+      },
+      {
+        "id": "user-model",
+        "label": "User Model (Mongoose)",
+        "group": "database"
+      },
+      {
+        "id": "transaction-model",
+        "label": "Transaction Model (Mongoose)",
+        "group": "database"
+      },
+      {
+        "id": "auth-middleware",
+        "label": "Auth Middleware (JWT)",
+        "group": "auth"
+      },
+      {
+        "id": "zod-validators",
+        "label": "Zod Validation",
+        "group": "backend"
+      },
+      {
+        "id": "user-routes",
+        "label": "User Routes",
+        "group": "backend"
+      },
+      {
+        "id": "transaction-routes",
+        "label": "Transaction Routes",
+        "group": "backend"
+      },
+      {
+        "id": "bcrypt",
+        "label": "Bcrypt (Password Hashing)",
+        "group": "auth"
+      }
+    ],
+    "edges": [
+      {
+        "source": "react-frontend",
+        "target": "express-backend",
+        "label": "REST API (Axios)"
+      },
+      {
+        "source": "express-backend",
+        "target": "mongodb",
+        "label": "Mongoose ORM"
+      },
+      {
+        "source": "user-routes",
+        "target": "auth-middleware",
+        "label": "Secured routes"
+      },
+      {
+        "source": "transaction-routes",
+        "target": "auth-middleware",
+        "label": "Secured routes"
+      },
+      {
+        "source": "user-routes",
+        "target": "zod-validators",
+        "label": "Input Validation"
+      },
+      {
+        "source": "transaction-routes",
+        "target": "zod-validators",
+        "label": "Input Validation"
+      },
+      {
+        "source": "user-model",
+        "target": "mongodb",
+        "label": "Schema"
+      },
+      {
+        "source": "transaction-model",
+        "target": "mongodb",
+        "label": "Schema"
+      },
+      {
+        "source": "express-backend",
+        "target": "user-model",
+        "label": "CRUD"
+      },
+      {
+        "source": "express-backend",
+        "target": "transaction-model",
+        "label": "CRUD"
+      },
+      {
+        "source": "auth-middleware",
+        "target": "express-backend",
+        "label": "Attaches user data to req"
+      },
+      {
+        "source": "express-backend",
+        "target": "bcrypt",
+        "label": "Password Hashing/Comparison"
+      },
+      {
+        "source": "express-backend",
+        "target": "auth-middleware",
+        "label": "JWT Token generation/verification"
+      }
+    ]
+  },
+  "keyFeatures": [
+    "User Authentication: Secure registration and login using JWTs.",
+    "Dashboard Overview: Displays total balance, income, and expenses.",
+    "Transaction Management: Add, view, delete, search, and filter income/expense transactions.",
+    "Categorization: Transactions are categorized for better financial tracking.",
+    "Date Tracking: Records transactions with specific dates.",
+    "Interactive Analytics: Visualizes financial data with monthly cash flow, balance trend, and expense category breakdown charts using Recharts.",
+    "User Profile Page: Displays user details like username, email, and member since date.",
+    "Responsive Design: Adapts UI for different screen sizes (desktop, mobile).",
+    "Input Validation: Client-side and server-side validation for all forms using Zod."
+  ],
+  "codeQualityReview": "The repository demonstrates good code quality with a clear separation of concerns; backend components (controllers, models, routes, middleware, validators) are well-organized, and the frontend uses a modular component structure. Consistent use of TypeScript across both client and server enhances type safety and maintainability. Naming conventions are logical and descriptive. The frontend leverages custom CSS for styling, maintaining a consistent UI. Reusable components (Button, Input, Card, Modal) are well-designed. Error handling is present, especially with Zod validation. However, some console logs in controllers could be removed or replaced with a more structured logging system for production. Overall, the codebase is clean, readable, and follows modern best practices for a MERN application.",
+  "securityAnalysis": "The application implements strong security practices: passwords are securely hashed using `bcrypt` with a salt round of 10, protecting against rainbow table attacks. JWTs are used for authentication and are set with an expiration (1 day) to limit session hijacking. Crucially, all sensitive transaction and profile routes are protected by `authMiddleware`, ensuring only authenticated users can access their data. Server-side input validation is rigorously applied using Zod to prevent common injection attacks and ensure data integrity. The `JWT_SECRET` is correctly loaded from environment variables (though a fallback 'secret' is present, which should be removed for production). CORS is configured to allow specific origins, preventing unauthorized cross-origin requests. User IDs are enforced for transaction ownership, preventing users from accessing or modifying other users' data. The API does not expose sensitive user data like hashed passwords.",
+  "improvements": [
+    "Implement refresh tokens for better JWT management and user experience without frequent re-logins.",
+    "Centralize and standardize error handling on the backend (e.g., dedicated error middleware) for consistent responses.",
+    "Replace `localStorage` usage for user data/token storage with more secure options like HTTP-only cookies to mitigate XSS risks.",
+    "Add pagination for transactions on the dashboard to improve performance with large datasets.",
+    "Introduce unit and integration tests for both frontend components and backend API endpoints.",
+    "Implement a dedicated logging solution (e.g., Winston, Pino) instead of `console.log` for better observability.",
+    "Enhance accessibility (A11y) for frontend components, especially forms and interactive elements.",
+    "Consider adding environment variables for frontend API base URL for easier deployment.",
+    "Improve data processing for balance trend in Analytics to handle gaps in dates more gracefully."
+  ],
+  "resumeDescription": "Developed a full-stack personal finance tracker using MERN stack, featuring secure JWT authentication, CRUD transaction management, and interactive analytics dashboards. Implemented robust Zod validation and bcrypt password hashing, ensuring data integrity and security for user financial data.",
+  "metrics": {
+    "totalFiles": 46,
+    "totalFolders": 14,
+    "linesOfCode": 4693,
+    "maxFolderDepth": 3,
+    "largestModule": {
+      "name": "Dashboard.css",
+      "sizeLines": 724
+    },
+    "mainLanguage": "TypeScript",
+    "languages": {
+      "json": 6,
+      "ts": 15,
+      "md": 1,
+      "js": 1,
+      "html": 1,
+      "css": 11,
+      "tsx": 11
+    },
+    "dependencies": [
+      "bcrypt",
+      "cors",
+      "dotenv",
+      "express",
+      "jsonwebtoken",
+      "mongoose",
+      "zod",
+      "@types/bcrypt",
+      "@types/cors",
+      "@types/express",
+      "@types/jsonwebtoken",
+      "@types/node",
+      "ts-node-dev",
+      "tsx",
+      "typescript",
+      "axios",
+      "lucide-react",
+      "react",
+      "react-dom",
+      "react-router-dom",
+      "recharts",
+      "@babel/core",
+      "@eslint/js",
+      "@rolldown/plugin-babel",
+      "@types/babel__core",
+      "@types/react",
+      "@types/react-dom",
+      "@vitejs/plugin-react",
+      "babel-plugin-react-compiler",
+      "eslint"
+    ]
+  }
+}

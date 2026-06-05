@@ -5,11 +5,13 @@ import {
   ArrowLeft, Target, Layers, Code2, Database, TerminalSquare,
   Download, Code, FolderTree, MessageSquare, Bot, User,
   Loader2, Stars, CheckCircle2, ChevronRight, FileCode2,
-  X, Sparkles, Package, FileText, Copy
+  X, Sparkles, Package, FileText, Copy, Network
 } from 'lucide-react';
 import ArchGraph from '../components/ArchGraph';
 import FileTree from '../components/FileTree';
 import ChatBox from '../components/ChatBox';
+import FolderRelationsGraph from '../components/FolderRelationsGraph';
+import VisualSection from '../components/VisualSection';
 import { chatWithRepository, explainFile as explainFileAPI } from '../services/apiService';
 import jsPDF from 'jspdf';
 
@@ -47,6 +49,16 @@ export default function Result() {
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const chatEndRef = useRef(null);
+  const [chatWidth, setChatWidth] = useState(350);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setChatWidth(window.innerWidth < 768 ? window.innerWidth : 350);
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   if (!summary) return null;
 
@@ -145,6 +157,7 @@ export default function Result() {
   const tabs = [
     { id: 'overview', label: 'Overview', icon: Target },
     { id: 'filetree', label: 'File Tree', icon: FolderTree },
+    { id: 'folderrelations', label: 'Folder Relations', icon: Network },
     { id: 'metrics', label: 'Metrics', icon: Database },
     { id: 'techstack', label: 'Tech Stack', icon: Package },
     { id: 'architecture', label: 'Architecture', icon: Layers },
@@ -192,10 +205,10 @@ export default function Result() {
         {/* ── MAIN CONTENT ── */}
         <main className="flex-1 flex flex-col overflow-hidden">
           {!selectedFile && (
-            <div className="shrink-0 border-b border-slate-800 bg-slate-900/50 px-4 flex items-center gap-1 h-11">
+            <div className="shrink-0 border-b border-slate-800 bg-slate-900/50 px-4 flex items-center gap-1 h-11 overflow-x-auto whitespace-nowrap scrollbar-none">
               {tabs.map(tab => (
                 <button key={tab.id} onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all border-b-2 ${activeTab === tab.id ? 'text-emerald-400 border-emerald-500 bg-slate-800/50' : 'text-slate-500 border-transparent hover:text-slate-300'}`}
+                  className={`flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all border-b-2 shrink-0 ${activeTab === tab.id ? 'text-emerald-400 border-emerald-500 bg-slate-800/50' : 'text-slate-500 border-transparent hover:text-slate-300'}`}
                 >
                   <tab.icon className="w-3.5 h-3.5" /> {tab.label}
                 </button>
@@ -261,15 +274,13 @@ export default function Result() {
                   </AnimatePresence>
                 </motion.div>
               ) : (
-                <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }} className={activeTab === 'filetree' ? "max-w-6xl w-full mx-auto" : "max-w-4xl mx-auto"}>
+                <motion.div key={activeTab} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }} className={activeTab === 'filetree' || activeTab === 'folderrelations' ? "max-w-6xl w-full mx-auto" : "max-w-4xl mx-auto"}>
 
                   {/* ═══ OVERVIEW TAB ═══ */}
                   {activeTab === 'overview' && (
                     <div className="space-y-6">
                       <h2 className="text-3xl font-bold flex items-center gap-3"><Target className="text-emerald-400 w-8 h-8" /> Project Overview</h2>
-                      <div className="glass-card rounded-2xl p-6 leading-relaxed text-slate-300 text-lg border border-slate-700/50">
-                        {summary.projectOverview || summary.summary}
-                      </div>
+                      <VisualSection text={summary.projectOverview || summary.summary} type="overview" />
 
                       {/* Quick metrics row */}
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -289,9 +300,7 @@ export default function Result() {
                       </div>
 
                       <h3 className="text-xl font-bold mt-8 mb-4 text-white">Code Quality Review</h3>
-                      <div className="glass-card rounded-2xl p-6 text-slate-300 border border-slate-700/50 leading-relaxed whitespace-pre-wrap">
-                        {summary.codeQualityReview}
-                      </div>
+                      <VisualSection text={summary.codeQualityReview} type="quality" />
                     </div>
                   )}
 
@@ -324,6 +333,23 @@ export default function Result() {
                           </div>
                         </div>
                         <ChatBox repoUrl={repoUrl} />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* ═══ FOLDER RELATIONS TAB ═══ */}
+                  {activeTab === 'folderrelations' && (
+                    <div className="space-y-6 flex flex-col h-[650px] min-h-[400px]">
+                      <div>
+                        <h2 className="text-3xl font-bold flex items-center gap-3">
+                          <Network className="text-emerald-400 w-8 h-8 animate-pulse" /> Folder Relations
+                        </h2>
+                        <p className="text-slate-400 text-sm mt-1">
+                          Understand connections, imports, and dependencies between folders of the repository.
+                        </p>
+                      </div>
+                      <div className="flex-1 min-h-0 bg-slate-900/40 border border-slate-800/80 rounded-2xl p-4 shadow-inner">
+                        <FolderRelationsGraph filesDatabase={filesDatabase} />
                       </div>
                     </div>
                   )}
@@ -420,9 +446,7 @@ export default function Result() {
                       </div>
 
                       <h3 className="text-xl font-bold mt-8 mb-4 text-white">Security Analysis</h3>
-                      <div className="glass-card rounded-2xl p-6 text-slate-300 border border-slate-700/50 leading-relaxed whitespace-pre-wrap">
-                        {summary.securityAnalysis}
-                      </div>
+                      <VisualSection text={summary.securityAnalysis} type="security" />
                     </div>
                   )}
 
@@ -433,9 +457,7 @@ export default function Result() {
                       <div className="bg-slate-900 border border-slate-700 rounded-2xl overflow-hidden shadow-inner h-[500px]">
                         <ArchGraph data={summary.architectureGraph} />
                       </div>
-                      <div className="glass-card rounded-2xl p-6 text-slate-300 text-base leading-relaxed border border-slate-700/50 whitespace-pre-wrap">
-                        {summary.architecture}
-                      </div>
+                      <VisualSection text={summary.architecture} type="architecture" />
                     </div>
                   )}
 
@@ -493,10 +515,10 @@ export default function Result() {
           {isChatOpen && (
             <motion.aside
               initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 350, opacity: 1 }}
+              animate={{ width: chatWidth, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ duration: 0.25 }}
-              className="border-l border-slate-800 bg-slate-900/50 flex flex-col z-10 shadow-2xl overflow-hidden shrink-0"
+              className="fixed md:relative right-0 top-14 md:top-0 bottom-0 z-40 md:z-10 border-l border-slate-800 bg-slate-950 md:bg-slate-900/50 flex flex-col shadow-2xl overflow-hidden shrink-0 h-[calc(100vh-3.5rem)] md:h-auto"
             >
               <div className="p-4 border-b border-slate-800 bg-slate-900 flex items-center gap-3 shrink-0">
                 <div className="p-1.5 bg-emerald-500/20 text-emerald-400 rounded-lg"><Bot className="w-5 h-5" /></div>
