@@ -10,7 +10,12 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    "http://localhost:5173",
+    "https://ai-repo-analyzer-vd78.vercel.app"
+  ]
+}));
 app.use(express.json({ limit: '50mb' }));
 
 // Initialize Socket.io
